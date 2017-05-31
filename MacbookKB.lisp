@@ -1,16 +1,15 @@
-
 ;;; Create high-level elements
 (new-type {computer} {physical object})
 (new-type {hardware} {physical object})
 (new-type {software} {information})
 
-;;; Different Computers types
+;;; Create different computers types
 (new-split-subtypes {computer} '({laptop} {desktop}))
 (new-type {Macintosh} {computer})
 (new-split-subtypes {laptop} '({ChromeBook} {Surface} {Macbook}))
 (new-is-a {Macbook} {Macintosh})
 
-;;; Different software types
+;;; Create different software types
 (new-type {operating system} {software})
 (new-split-subtypes {operating system}  '({MacOS} {Linux} {Windows}))
 
@@ -24,13 +23,12 @@
 (new-is-a {operating system of Macbook} {MacOS})
 
 ;;; Version role of software
-(new-type {version} {string})
+(new-type {version} {thing})
 (new-type-role {version of software} {software} {version})
 
 ;;; Create a new Macbook
 (new-indv {Macbook_1} {Macbook} :english '("Mac 1"))
-(x-is-the-y-of-z {operating system of Macbook_1} {operating system of Macbook} {Macbook_1})
-;;; {operating system of Macbook} cannot be the {operating system of Macbook} of {Macbook}.  Continuing...
+(x-is-the-y-of-z {operating system of Macbook_1} {operating system of computer} {Macbook_1})
 (new-is-a {operating system of Macbook_1} {MacOS})
 (x-is-the-y-of-z (new-string {"10.9.2"}) {version of software} {operating system of Macbook_1})
 
