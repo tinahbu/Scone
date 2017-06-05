@@ -1,38 +1,32 @@
-# import os
-# os.system('./sbcl/run-sbcl.sh')
-
-import multiprocessing
-from time import sleep
-
-semaphore = multiprocessing.Semaphore(1)
-
-def scone(my_id):
-    with semaphore:
-        sleep(1)
-    print("Hello, I am Scone\n")
+import time, os
+from multiprocessing import Process
+from state_modifier import StateModifier
+from state_inquirer import StateInquirer
+from scone import Scone
 
 
-def state_modifier(my_id):
-    with semaphore:
-        sleep(1)
-    print("Hello, I am state_modifier\n")
+def run_scone():
+    Scone().run()   # run scone service
 
 
-def state_inquirer(my_id):
-    with semaphore:
-        sleep(1)
-    print("Hello, I am state_inquirer\n")
+def run_state_modifier():
+    StateModifier().run()
+
+
+def run_state_inquirer():
+    StateInquirer().run()
+
+
+def bootstrap_ns():
+    os.system('pyro4-ns')   # start name server
 
 
 def main():
-    pool = multiprocessing.Pool(3)
-
-    pool.apply_async(scone, [0])
-    pool.apply_async(state_modifier, [1])
-    pool.apply_async(state_inquirer, [2])
-
-    pool.close()
-    pool.join()
+    Process(target=bootstrap_ns).start()
+    Process(target=run_scone).start()
+    time.sleep(5)  # wait enough time to make sure scone service is registered
+    Process(target=run_state_modifier).start()
+    Process(target=run_state_inquirer).start()
 
 
 if __name__ == "__main__":
