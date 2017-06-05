@@ -1,5 +1,4 @@
 import Pyro4
-import osquery
 
 
 class StateModifier(object):
@@ -12,3 +11,4 @@ class StateModifier(object):
             # do with scone
             self.scone.interface1()
             break
+

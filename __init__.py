@@ -26,7 +26,7 @@ def main():
     Process(target=run_scone).start()
     time.sleep(5)  # wait enough time to make sure scone service is registered
     Process(target=run_state_modifier).start()
-    Process(target=run_state_inquirer).start()
+    # Process(target=run_state_inquirer).start()
 
 
 if __name__ == "__main__":
