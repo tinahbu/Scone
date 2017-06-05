@@ -1,0 +1,39 @@
+Release Notes for the Scone Knowledge-Base System
+Author: Scott E. Fahlman <sef@cs.cmu.edu>
+===========================================================================
+User-visible changes since v1.0.0:
+===========================================================================
+Eliminated all the "simple" prefixes in the core-components files,
+and updated the core.lisp file to load the new names.  Some of these
+files are indeed very minimal, but I don't want to be thinking about
+how complex they have to be before we drop the "simple".  If some
+files ultimately have a simple "core" version and a more complex
+version for some class of applications, we can worry about appropriate
+naming then.
+
+Moved some upper-ontology stuff (e.g. the definition of {event}) from
+episodic.lisp to upper-lisp, since other things will need to see these
+elements.
+
+Began consolidating some of Laleh's KB stuff from the
+vehicle-maintenance domain into a new directory that is not (for now)
+part of "core".  Began consolidating episodic stuff from Laleh and
+Maria into episodic.lisp, and began adding some of my own
+augmentations.
+
+Remove *kb-logging-stream* and the functionality that supports it.
+This continuous-logging facility was added during the RADAR project on
+the theory that it made a continuously-learning system more robust
+than occasional checkpointing.  But to the best of my knowledge it has
+never been used, and keeping it all consistent has been a big extra
+drag on engine development.
+
+Modified IS-X-A-Y? and IS-X-EQ-Y? to return the proper second values,
+as documented in the Scone User's Guide..  That is, if the answer is
+:NO due to a violated split or an explicit NOT-EQ link, return that
+split or link as the second value.  This is the item you should cancel
+if you want to force the answer to be :YES.
+
+NOTE: There's a known bug here.  It appears that NOT-EQ links are not placing
+negation markers correctly.  This will be fixed soon.  I think that
+IS-NOT-A negation is now working as intended.
