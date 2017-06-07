@@ -11,8 +11,6 @@ from subprocess import Popen, PIPE
 class Scone(object):
     def __init__(self):
         self.lock = RLock()
-        signal.signal(signal.SIGINT, self.kill_sbcl)
-        signal.signal(signal.SIGTERM, self.kill_sbcl)
         # redirect sbcl's output and input to PIPE, so we can send string to stdin and stdout, just like what we do in
         # cmd.
         # to enter input and outpt
