@@ -7,7 +7,8 @@ class StateInquirer(object):
 
     def run(self):
         while True:
+            SCONE = self.scone
             # do with scone
-            self.scone.interface2()
+            SCONE.interface2()
             break
 

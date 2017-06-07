@@ -1,7 +1,7 @@
 from fcntl import fcntl, F_GETFL, F_SETFL
 from os import O_NONBLOCK
 from time import sleep
-
+import signal
 import Pyro4 as Pyro4
 from threading import RLock
 from subprocess import Popen, PIPE
@@ -11,6 +11,8 @@ from subprocess import Popen, PIPE
 class Scone(object):
     def __init__(self):
         self.lock = RLock()
+        signal.signal(signal.SIGINT, self.kill_sbcl)
+        signal.signal(signal.SIGTERM, self.kill_sbcl)
         # redirect sbcl's output and input to PIPE, so we can send string to stdin and stdout, just like what we do in
         # cmd.
         # to enter input and outpt
@@ -68,6 +70,9 @@ class Scone(object):
         self.lock.acquire()
         print 456
         self.lock.release()
+
+    def kill_sbcl(self, signum, frame):
+        self.sbcl_process.kill()
 
     def run(self):
         daemon = Pyro4.Daemon()

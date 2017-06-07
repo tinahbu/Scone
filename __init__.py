@@ -1,8 +1,9 @@
-import time, os
+from time import sleep
 from multiprocessing import Process
 from state_modifier import StateModifier
 from state_inquirer import StateInquirer
 from scone import Scone
+import os
 
 
 def run_scone():
@@ -24,9 +25,9 @@ def bootstrap_ns():
 def main():
     Process(target=bootstrap_ns).start()
     Process(target=run_scone).start()
-    time.sleep(5)  # wait enough time to make sure scone service is registered
+    sleep(5)  # wait enough time to make sure scone service is registered
     Process(target=run_state_modifier).start()
-    # Process(target=run_state_inquirer).start()
+    Process(target=run_state_inquirer).start()
 
 if __name__ == "__main__":
     main()
