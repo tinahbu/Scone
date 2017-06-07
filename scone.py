@@ -1,5 +1,6 @@
 from fcntl import fcntl, F_GETFL, F_SETFL
 from os import O_NONBLOCK
+from time import sleep
 
 import Pyro4 as Pyro4
 from threading import RLock
@@ -19,6 +20,8 @@ class Scone(object):
         # set stdout to non-blocking
         fcntl(self.sbcl_process.stdout, F_SETFL, flags | O_NONBLOCK)
         # skip all the output at the ver beginning
+        sleep(2)
+        print("**********SBCL init begins**********")
         while True:
             try:
                 line = self.sbcl_process.stdout.readline()
@@ -28,7 +31,7 @@ class Scone(object):
             print(line)
         # set flag back to blocking
         fcntl(self.sbcl_process.stdout, F_SETFL, flags)
-        print("sbcl completes init!")
+        print("**********SBCL init ends**********")
 
     def write_input(self, my_input):
         # send command to sbcl
@@ -46,7 +49,7 @@ class Scone(object):
 
     def interface1(self):
         self.lock.acquire()
-        self.write_input("123")
+        self.write_input("123456789")
         str0 = self.read_output()
         print(str0)
         self.lock.release()
