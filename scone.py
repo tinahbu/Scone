@@ -14,24 +14,29 @@ class Scone(object):
         # redirect sbcl's output and input to PIPE, so we can send string to stdin and stdout, just like what we do in
         # cmd.
         # to enter input and outpt
-        self.sbcl_process = Popen(['./sbcl/run-sbcl.sh'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+        self.sbcl_process = Popen(['./sbcl/run-sbcl.sh'], stdout=PIPE, stdin=PIPE, stderr=PIPE, shell=True)
+        sleep(2)
         # get get current stdout flags
         flags = fcntl(self.sbcl_process.stdout, F_GETFL)
         # set stdout to non-blocking
         fcntl(self.sbcl_process.stdout, F_SETFL, flags | O_NONBLOCK)
         # skip all the output at the ver beginning
-        sleep(2)
         print("**********SBCL init begins**********")
-        while True:
-            try:
-                line = self.sbcl_process.stdout.readline()
-            # IOError means we reach the end of file until now
-            except IOError:
-                break
+        lines = self.read_output()
+        for line in lines:
             print(line)
-        # set flag back to blocking
-        fcntl(self.sbcl_process.stdout, F_SETFL, flags)
         print("**********SBCL init ends**********")
+        print('')
+        print("**********Scone init begins**********")
+        self.write_input('(load "scone/scone-loader.lisp")')
+        self.write_input('(scone "")')
+        self.write_input('(load-kb "core")')
+        # TODO Need to find a better way to determine whether we reach the end
+        sleep(2)
+        lines = self.read_output()
+        for line in lines:
+            print(line)
+        print("**********Scone init ends**********")
 
     def write_input(self, my_input):
         # send command to sbcl
@@ -39,19 +44,24 @@ class Scone(object):
         self.sbcl_process.stdin.write(my_input + "\n")
 
     def read_output(self):
-        # read output from sbcl
-        # the out put format for sbcl is:
-        # \n
-        # (result string)
-        # so we need readline twice to get the second line(result string)
-        self.sbcl_process.stdout.readline()
-        return self.sbcl_process.stdout.readline().strip(" \n")
+        lines = []
+        while True:
+            try:
+                line = self.sbcl_process.stdout.readline()
+            # IOError means we reach the end of file until now
+            except IOError:
+                break
+            lines.append(line)
+        return lines
 
     def interface1(self):
         self.lock.acquire()
-        self.write_input("123456789")
-        str0 = self.read_output()
-        print(str0)
+        self.write_input('(is-x-a-y? {operating system of Macbook_1} {Linux})')
+        # TODO
+        sleep(2)
+        lines = self.read_output()
+        for line in lines:
+            print(line)
         self.lock.release()
 
     def interface2(self):

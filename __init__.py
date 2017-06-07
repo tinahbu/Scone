@@ -28,6 +28,5 @@ def main():
     Process(target=run_state_modifier).start()
     # Process(target=run_state_inquirer).start()
 
-
 if __name__ == "__main__":
     main()
