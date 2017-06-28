@@ -4,7 +4,7 @@
 ;;;
 ;;; Author & Maintainer: Scott E. Fahlman
 ;;; ***************************************************************************
-;;; Copyright (C) 2003-2014, Carnegie Mellon University.
+;;; Copyright (C) 2003-2017, Carnegie Mellon University.
 ;;;
 ;;; The Scone software is made available to the public under the
 ;;; Apache 2.0 open source license.  A copy of this license is
@@ -18,7 +18,7 @@
 ;;; express or implied.  See the License for the specific language
 ;;; governing permissions and limitations under the License.
 ;;;
-;;; Development since February 2013 has been supported in part by the
+;;; Development Feb 2013 - Dec 2015 was supported in part by the
 ;;; U.S. Office of Naval Research under award number N000141310224.
 ;;;
 ;;; Development of Scone from January, 2012, through August 2013 was
@@ -42,6 +42,7 @@
 ;;; representing the official policies or endorsements, either
 ;;; expressed or implied, of IARPA, DoD/ARL, ONR, DARPA, the
 ;;; U.S. Government, or any of our other sponsors.
+;;;
 ;;; ***************************************************************************
 ;;; GENERAL STYLE NOTE: We want the runtime marker-scanning operations
 ;;; to be as fast as possible and to be non-consing.  So that code is
@@ -285,19 +286,6 @@
     (format *commentary-stream* "~&")
     (apply #'format (cons *commentary-stream* args))
     (terpri *commentary-stream*)))
-
-(defvar *kb-logging-stream* nil
-  "If non-nil, every KB alteration is reflected by an entry to this stream,
-   so that the resulting file can be read back in with RELOAD-KB.")
-(declaim (type stream *logging-stream*))
-
-(defun kb-log (&rest args)
-  "Syntax is just like FORMAT with no stream arg.  If *KB-LOGGING-STREAM*
-   is non-null, execute the format call, writing the resulting string out
-   to the KB logging stream."
-  (when *kb-logging-stream*
-    (apply #'format *kb-logging-stream* args)
-    (force-output *kb-logging-stream*)))
 
 ;;; ========================================================================
 (subsection "Variables Related to Element Names")
@@ -1101,9 +1089,6 @@
 	(describe x stream)
 	(format stream "~S is an element-iname structure.~%" obj))))
 
-(to-do "Write a new DECSRIBE-OBJECT method for Scone elements so that
-   the result is more understandable and less cluttered.")
-
 (defun make-element (flags iname parent context a b c 
 			   english english-default hashtable definition
 			   properties)
@@ -1148,11 +1133,11 @@
     ;; Tick the element counter.
     (incf (the fixnum *n-elements*))
     ;; Process all the outoging wire connections.
-    (when parent (connect-wire :parent e parent t t))
-    (when context (connect-wire :context e context t t))
-    (when a (connect-wire :a e a t t))
-    (when b (connect-wire :b e b t t))
-    (when c (connect-wire :c e c t t))
+    (when parent (connect-wire :parent e parent t))
+    (when context (connect-wire :context e context t))
+    (when a (connect-wire :a e a t))
+    (when b (connect-wire :b e b t))
+    (when c (connect-wire :c e c t))
     ;; Process English names, if any.
     (unless (listp english)
       (setq english (list english)))
@@ -1170,55 +1155,39 @@
     ;; If there is a definition, record it and make sure the defined-flag
     ;; is set.
     (when definition
-      (set-definition e definition t))
+      (set-definition e definition))
     ;;; If there is a :PLIST argument, that becomes the property list.
     (when properties
-      (set-properties e properties t))
-    ;;; Log the creation of a new element.
-    (kb-log "(make-element ~S ~S ~S ~S ~S ~S ~S '~S '~S '~S '~S '~S '~S)~%"
-	    flags iname parent context a b c english english-default
-	    hashtable definition properties)
+      (set-properties e properties))
     e))
 
 ;;; ========================================================================
 (subsection "Low-Level Element Operations")
 
-(defun set-flag (e flag &optional (already-logged nil))
-  "Set the specified FLAG (a bit mask) in element E.  Log this KB change
-   unless it was done already."
+(defun set-flag (e flag)
+  "Set the specified FLAG (a bit mask) in element E."
   (declare (fixnum flag))
   (prog1
       (setf (flags e)
-	    (logior (flags e) flag))
-    (unless already-logged
-      (kb-log "(set-flag ~S '~S)~%" e flag))))
+	    (logior (flags e) flag))))
 
-(defun clear-flag (e flag &optional (already-logged nil))
-  "Clear the specified FLAG (a bit mask) in element E.  Log this KB change
-   unless it was done already."
+(defun clear-flag (e flag)
+  "Clear the specified FLAG (a bit mask) in element E."
   (declare (fixnum flag))
   (prog1
       (setf (flags e)
-	    (logand (flags e) (lognot flag)))
-    (unless already-logged
-      (kb-log "(clear-flag ~S '~S)~%" e flag))))
+	    (logand (flags e) (lognot flag)))))
 
-(defun set-definition (e definition &optional (already-logged nil))
-  "Add DEFINITION to element E, setting the defined-flag of E.  Log the KB
-   change unless this has already been done."
+(defun set-definition (e definition)
+  "Add DEFINITION to element E, setting the defined-flag of E."
   (setq e (lookup-element-test e))
   (setf (definition e) definition)
-  (set-flag e defined-flag t)
-  (unless already-logged
-    (kb-log "(set-definition ~S '~S)~%" e definition)))
+  (set-flag e defined-flag))
 
-(defun set-properties (e plist &optional (already-logged nil))
-  "Set the property list of element E to PLIST.  Log the KB change unless
-   this has already been done."
+(defun set-properties (e plist)
+  "Set the property list of element E to PLIST."
   (setq e (lookup-element-test e))
-  (setf (properties e) plist)
-  (unless already-logged
-    (kb-log "(set-properties ~S '~S)~%" e plist)))
+  (setf (properties e) plist))
 
 (defmacro do-elements ((var &optional (after nil)) &body body)
   "This macro iterates over the set of all elements.  Each element in turn
@@ -1342,31 +1311,21 @@
    not present."
   `(getf (properties ,e) ,property))
 
-(defun set-element-property (e property &optional (value t)
-			       (already-logged nil))
+(defun set-element-property (e property &optional (value t))
   "Set the specified PROPERTY of element E to the designated VALUE,
-   which defaults to T.  Log this KB change unless it was done already."
+   which defaults to T."
   (prog1
-      (setf (getf (properties e) property) value)
-    (unless already-logged
-      (kb-log "(set-element-property ~S '~S '~S)~%" e property value))))
+      (setf (getf (properties e) property) value)))
 
-(defun clear-element-property (e property &optional (already-logged nil))
+(defun clear-element-property (e property)
   "Remove the specified PROPERTY of element E.  If E doesn't have this property,
-   do nothing.  Log this KB change unless it was done already."
-  (prog1
-      (remf (properties e) property)
-    (unless already-logged
-      (kb-log "(clear-element-property ~S '~S)~%" e property))))
+   do nothing."
+  (remf (properties e) property))
 
-(defun push-element-property (e property value &optional (already-logged nil))
+(defun push-element-property (e property value)
   "The PROPERTY of E should be a list.  Push VALUE onto this list.  Create
-   the property if it doesn't already exist.  Log this KB change
-   unless it was done already."
-  (prog1 
-      (push value (getf (properties e) property))
-    (unless already-logged
-      (kb-log "(push-element-property ~S '~S '~S)~%" e property value))))
+   the property if it doesn't already exist."
+  (push value (getf (properties e) property)))
 
 ;;; ***************************************************************************
 (section "Accessing, Connecting, and Disconnecting Wires")
@@ -1394,15 +1353,14 @@
     (:b (incoming-b-wires e))
     (:c (incoming-c-wires e))
     (:parent (incoming-parent-wires e))
-    (:context (incoming-context-wires e))))
+    (:context (incoming-context-wires e))
+    (:split (incoming-split-wires e))))
 
-(defun connect-wire (wire-name from to &optional (may-defer nil)
-			       (already-logged nil))
+(defun connect-wire (wire-name from to &optional (may-defer nil))
   "Connect the wire specified by WIRE-NAME (:A, :PARENT, etc.) of
    element FROM to element TO.  If FROM is already connected
-   somewhere, disconnect it first.  Log the KB change if it is not
-   already logged.  If connecting a context-wire to an active TO node,
-   activate the FROM node as well."
+   somewhere, disconnect it first.  If connecting a context-wire to an
+   active TO node, activate the FROM node as well."
   (setq from (lookup-element-test from))
   (setq to (lookup-element-or-defer to))
   ;; If the element is not yet defined, but *CREATE-UNDEFINED-ELEMENTS*
@@ -1420,7 +1378,7 @@
 	 ;; At this point, TO is an element, so build the connection.
 	 (when (and (wire wire-name from)
 		    (not (eq wire-name :split)))
-	   (disconnect-wire wire-name from t))
+	   (disconnect-wire wire-name from))
 	 (ecase wire-name
 	   (:a (setf (a-wire from) to)
 	       (push from (incoming-a-wires to)))
@@ -1436,21 +1394,17 @@
 		     (when (fast-marker-on? to *activation-marker*)
 		       (fast-mark from *activation-marker*)))
 	   (:split (push to (split-wires from))
-		   (push from (incoming-split-wires to))))
-	 ;; Log the new connection.
-	 (unless already-logged
-	   (kb-log "(connect-wire ~S ~S ~S ~S)~%" wire-name from to may-defer)))
+		   (push from (incoming-split-wires to)))))
 	;; The TO argument is not an existing connection.  Defer it if allowed
 	;; to, or signal an error.
 	((and may-defer (typep to '(or element-iname string)))
 	 (defer-connection wire-name from to))
 	(t (error "~S is not an element." to))))
 
-(defun disconnect-wire (wire-name from &optional (already-logged nil))
+(defun disconnect-wire (wire-name from)
   "Disconnect the wire specified by WIRE-NAME (:A, :PARENT, etc.)  of
    element FROM from wherever it is currently connected to.  If it is
-   not connected, do nothing.  Log the KR change if it is not already
-   logged."
+   not connected, do nothing."
   (setq from (lookup-element-test from))
   (let ((to (wire wire-name from)))
     (when to
@@ -1469,34 +1423,27 @@
 		       (delete from (incoming-parent-wires to))))
 	(:context (setf (context-wire from) nil)
 		  (setf (incoming-context-wires to)
-			(delete from (incoming-context-wires to)))))
-      ;; Log the new connection.
-      (unless already-logged
-	(kb-log "(disconnect-wire ~S ~S)~%" wire-name from)))))
+			(delete from (incoming-context-wires to))))))))
 
 ;;; We need a separate function for disconnecting one split wire, since we
 ;;; need to specify the TO argument.
 
-(defun disconnect-split-wire (from to &optional (already-logged nil))
+(defun disconnect-split-wire (from to)
   "Disconnect the SPLIT-wire between element FROM and element TO.  If they
-   are not connected, do nothing.  Log the KR change if it is not already
-   logged."
+   are not connected, do nothing."
   (declare (type element from to))
   (setq from (lookup-element-test from))
   (setq to (lookup-element-test to))
   (setf (split-wires from)
 	(delete to (split-wires from)))
   (setf (incoming-split-wires to)
-	(delete from (incoming-split-wires to)))
-  ;; Log the new connection.
-  (unless already-logged
-    (kb-log "(disconnect-split-wire ~S ~S)~%" from to)))
+	(delete from (incoming-split-wires to))))
 
-(defun disconnect-split-wires (from &optional (already-logged nil))
+(defun disconnect-split-wires (from)
   "Disconnect all the SPLIT-wires between element FROM and other elements."
   (setq from (lookup-element-test from))
   (dolist (to (split-wires from))
-    (disconnect-split-wire from to already-logged)))
+    (disconnect-split-wire from to)))
 
 (defun convert-parent-wire-to-link (e &key (context *context*))
   "The parent-wire of element E is disconnected and replaced by an
@@ -2560,8 +2507,8 @@
 		complete-split-mask)
 	    iname parent context
 	    nil nil nil english nil nil nil nil)))
-    (set-element-property s :split-supertype supertype t)
-    (push-element-property supertype :complete-split-subtypes s t)
+    (set-element-property s :split-supertype supertype)
+    (push-element-property supertype :complete-split-subtypes s)
     (dolist (m members)
       (setq m (lookup-element-test m))
       (connect-wire :split s m))
@@ -2622,7 +2569,7 @@
    provide a :PARENT element for the relation itself.  Optionally set
    the :SYMMETRIC and :TRANSITIVE properties of the relation.  These
    refer to the relation from A to B.  The :ENGLISH argument, as
-   usual, is the name of the role (or set of names) in the forward
+   usual, is the name of the relation (or set of names) in the forward
    direction.  The :INVERSE argument is similar in form, but in the
    reverse direction."
   (unless (and iname
@@ -4303,7 +4250,7 @@ some conditions.  Examine and fix if necessary.")
 		       (flags-set 0)
 		       (flags-clear 0))
   "M is a marker.  MUST-BE-SET and MUST-BE-CLEAR are lists of markers
-   indicated by name or by number.  Scan all elements in the current
+   indicated by name or by number.  Scan all elements i(scone)n the current
    context.  If an element has all the MUST-BE-SET bits on and all the
    MUST-BE-CLEAR bits off, set marker M on that element.  If supplied
    the FLAGS-SET and FLAGS-CLEAR are integer masks indicating which
@@ -4581,9 +4528,10 @@ some conditions.  Examine and fix if necessary.")
   (when downscan (downscan-internal m :cross-map nil nil nil))
   (fast-marker-count m))
 
-(defmacro cross-rel (m-rel m-source m-target reverse)
+(defmacro cross-rel (m-rel m-source m-target reverse mark-link)
   "Cross REL-LINKs that are active and marked.  If REVERSE is T, cross
-   B-to-A; if NIL, cross A-to-B."
+   B-to-A; if NIL, cross A-to-B. If MARK-LINK is T, mark the link we
+   are crossing with M-TARGET, rather than the node on the other side."
   `(let* ((markable-mask
 	   ;; If *IGNORE-CONTEXT*, don't check for activation.
 	   (if *ignore-context* 0 *activation-mask*))
@@ -4603,18 +4551,22 @@ some conditions.  Examine and fix if necessary.")
 		      x))
 	 (when (and (fast-marker-on? link ,m-rel)
 		    (fast-statement? link)
-		    (fast-usable-element? link)
-		    (setq target (,(if reverse 'a-wire 'b-wire)
-				  link))
-		    (fast-markable-element? target))
-	   (fast-mark target ,m-target))))))
+		    (fast-usable-element? link))
+	   ;; Decide what to mark: the link itself, its B-element, or its A-element.
+	   (setq target (cond (,mark-link link)
+			      (,reverse (a-wire link))
+			      (t (b-wire link))))
+	   ;; Check and mark it.
+	   (when (fast-markable-element? target)
+	     (fast-mark target m)))))))
 
-(defun mark-rel-internal (rel a m fwd rev
+(defun mark-rel-internal (rel a m fwd rev mark-link
 			      downscan augment recursion-allowance)
   "Internal function to put marker M on all elements E such that (if
-   FWD) 'A REL E' and (if REV) 'E REL A'.  If DOWNSCAN, mark subtypes
+   FWD) 'A REL E' and (if REV) 'E REL A'. If DOWNSCAN, mark subtypes
    and instances of E.  If AUGMENT, do not clear M before doing this
-   operation."
+   operation. If MARK-LINK, put marker M on the relation link to
+   target node E, rather than the element E."
   (declare (fixnum recursion-allowance))
   (check-legal-marker-pair m)
   (unless augment (clear-marker-pair m))
@@ -4627,34 +4579,52 @@ some conditions.  Examine and fix if necessary.")
     (setq rev t))
   ;; Allocate the markers.
   (with-markers (m-a m-rel)
-    (progn
-      ;; Do a full downscan from REL using M-REL.
-      (downscan rel m-rel)
-      ;; Simple upscan from A using M-A.  Mark map-nodes but
-      ;; do not cross them.
-      (mark a m-a)
-      (upscan-internal m-a :no-map nil nil nil)
-      ;; Cross any marked rel-links A-to-B.
-      (when fwd (cross-rel m-rel m-a m nil))
-      ;; Cross any marked rel-links B-to-A.
-      (when rev (cross-rel m-rel m-a m t))
-      ;; Now explore the descriptions in which A plays a role.
-      (unless (<= recursion-allowance 0)
-	(do-marked (source m-a)
-	  ;; Look for map-nodes marked with M-A.
-	  (when (fast-map-node? source)
-	    (mark-rel-description source m m-rel fwd rev
-				  downscan recursion-allowance))))
-      ;; Final eq-scan or downscan of M.
-      (when (> (fast-marker-count m) 0)
-	(if downscan
-	    (downscan nil m :augment t)
-	    (eq-scan nil m :augment t)))))
+    (prog ((transitive (fast-transitive? rel))
+	   ;; Element most recently marked with M. Might be NIL.
+	   (prev-marked-element (svref *last-marked-element* m)))
+       ;; Do a full downscan from REL using M-REL.
+       (downscan rel m-rel)
+       ;; Execute the body below here at least once, and potentially
+       ;; loop back here if the relation is transitive.
+       TRANSITIVE-LOOP
+       ;; Simple upscan from A using M-A.  Mark map-nodes but
+       ;; do not cross them.
+       (mark a m-a)
+       (upscan-internal m-a :no-map nil nil nil)
+       ;; Cross any marked rel-links A-to-B.
+       (when fwd (cross-rel m-rel m-a m nil mark-link))
+       ;; Cross any marked rel-links B-to-A.
+       (when rev (cross-rel m-rel m-a m t mark-link))
+       ;; Now explore the descriptions in which A plays a role.
+       (unless (<= recursion-allowance 0)
+	 (do-marked (source m-a)
+	   ;; Look for map-nodes marked with M-A.
+	   (when (fast-map-node? source)
+	     (mark-rel-description source m m-rel fwd rev mark-link
+				   downscan recursion-allowance))))
+       ;; Final eq-scan or downscan of M.
+       (when (> (fast-marker-count m) 0)
+	 (if downscan
+	     (downscan nil m :augment t)
+	     (eq-scan nil m :augment t)))
+       ;; If REL is a transitive relation, and if there are any newly
+       ;; M-marked nodes we have not yet processed, pick the first of
+       ;; these, make it the new A node, and jump back to
+       ;; TRANSITIVE-LOOP. Iterate until there are no more new ones.
+       (when (and transitive
+		  (not (eq prev-marked-element
+			   (svref *last-marked-element* m))))
+	 (if prev-marked-element
+	     (setq a (svref (next-marked-element prev-marked-element) m))
+	     (setq a (svref *first-marked-element* m)))
+	 (setq prev-marked-element a)
+	 (clear-marker-pair m-a)
+	 (go TRANSITIVE-LOOP))))
   (fast-marker-count m))
 
-(defun mark-rel-description (source m m-rel fwd rev downscan
-				    recursion-allowance)
-  "Function called within MARK-REL-INTERNAL to explore
+(defun mark-rel-description (source m m-rel fwd rev mark-link
+			     downscan recursion-allowance)
+  "Function called within MARK-REL-INTERNAL to explore inherited
    descriptions. May recurse, up to limits set by the allowance
    variables."
   (declare (fixnum recursion-allowance))
@@ -4671,9 +4641,9 @@ some conditions.  Examine and fix if necessary.")
 	  (mark source m-source)
 	  (upscan-internal m-source :gate-map m-desc nil nil)
 	  ;; Cross any marked rel-links A-to-B.
-	  (when fwd (cross-rel m-rel m-source m-target nil))
+	  (when fwd (cross-rel m-rel m-source m-target nil mark-link))
 	  ;; Cross any marked rel-links B-to-A.
-	  (when rev (cross-rel m-rel m-source m-target t))
+	  (when rev (cross-rel m-rel m-source m-target t mark-link))
 	  ;; Now recursively explore any descriptions in which SOURCE
 	  ;; plays a role.
 	  (unless (<= recursion-allowance 0)
@@ -4682,7 +4652,7 @@ some conditions.  Examine and fix if necessary.")
 	      (when (and (not (eq map source))
 			 (fast-map-node? map))
 		(mark-rel-description map m-target m-rel
-				      fwd rev downscan
+				      fwd rev mark-link downscan
 				      (- recursion-allowance 1)))))
 	  ;; Now eq-scan or downscan M-TARGET with M-DESC as focus.
 	  (if downscan
@@ -4725,8 +4695,10 @@ some conditions.  Examine and fix if necessary.")
     ;; If the REL argument is an english name with an
     ;; :INVERSE-RELATION tag, we do the inverse operation.
     (if (eq tag :inverse-relation)
-	(mark-rel-internal rel a m nil t downscan augment recursion-allowance)
-	(mark-rel-internal rel a m t nil downscan augment recursion-allowance))))
+	(mark-rel-internal rel a m nil t nil
+			   downscan augment recursion-allowance)
+	(mark-rel-internal rel a m t nil nil
+			   downscan augment recursion-allowance))))
 
 (defun mark-rel-inverse
     (rel a m
@@ -4746,15 +4718,10 @@ some conditions.  Examine and fix if necessary.")
     ;; If the REL argument is an english name with an
     ;; :INVERSE-RELATION tag, we do the forward operation.
     (if (eq tag :inverse-relation)
-	(mark-rel-internal rel a m t nil downscan augment recursion-allowance)
-	(mark-rel-internal rel A m nil t downscan augment recursion-allowance))))
-
-(to-do
- "Consider whether we need to implement a description allowance for
-   MARK-REL and friends.")
-
-(to-do
- "Add scans for transitive relations.")
+	(mark-rel-internal rel a m t nil nil
+			   downscan augment recursion-allowance)
+	(mark-rel-internal rel A m nil t nil
+			   downscan augment recursion-allowance))))
 
 ;;; ========================================================================
 (subsection "Context Activation")
@@ -4817,15 +4784,42 @@ some conditions.  Examine and fix if necessary.")
 
 (defun is-x-a-y? (x y)
   "Predicate to determine whether type or individual X is or can be a
-   Y in the current context.  Returns :yes if X is known to be a Y,:no
-   if X definitely cannot be a Y, and :maybe otherwise.  For the :no
-   response, returns a second value, the split or superior type node
-   that is conflicted."
-  (let ((err nil))
-    (cond ((simple-is-x-a-y? x y) :yes)
-	  ((setq err (incompatible? x y))
+   Y in the current context.  Returns :YES if X is known to be a Y,
+   :NO if X definitely cannot be a Y, and :MAYBE otherwise.  For the
+   :NO response, returns a second value, the split or negation link
+   that is causing the conflict."
+  (setq x (lookup-element-test x))
+  (setq y (lookup-element-test y))
+  (with-markers (m1)
+    (let ((err nil))
+      ;; Mark superiors of X with M1.
+      (upscan x m1)
+      (cond
+	;; If Y is explicitly NOT a superior due to a negation link,
+	;; the answer is :NO.  Return the negation link as the second
+	;; value.
+	((marker-on? y (get-cancel-marker m1))
+	 (values
+	  :no
+	  (find-is-not-a-link y m1)))
+	;; If Y is marked as a superior, the answer is :YES.
+	((marker-on? y m1)
+	 :yes)
+	;; If X and Y are on different branches of a split, the answer
+	;; is :NO.  Return the split as a second value.
+	((setq err (incompatible? x y))
 	   (values :no err))
-	  (t :maybe))))
+	;; Otherwise, the answer is :MAYBE.
+	(t :maybe)))))
+
+(defun find-is-not-a-link (node m1)
+  "NODE got tagged with a cancel-marker M1C during an upscan of
+   marker M1.  Find the is-not-a link responsible, or one of them if there are
+   more than one."
+  (dolist (link (incoming-b-elements node))
+    (when (and (is-not-a-link? link)
+	       (marker-on? (a-element link) m1))
+      (return-from find-is-not-a-link link))))
 
 (defun simple-is-x-eq-y? (x y)
   "Predicate to determine whether node X is known to be identical to
@@ -4838,16 +4832,47 @@ some conditions.  Examine and fix if necessary.")
       (marker-on? y m1))))
 
 (defun is-x-eq-y? (x y)
-  "Predicate to determine whether type or individual X is or can be EQ (identical) to
-   Y in the current context.  Returns :yes if X is known to be EQ to Y,:no
-   if X definitely cannot be EQ to Y, and :maybe otherwise.  For the :no
-   response, returns a second value, the split or superior type node
-   that is conflicted."
-  (let ((err nil))
-    (cond ((simple-is-x-eq-y? x y) :yes)
-	  ((setq err (incompatible? x y))
+  "Predicate to determine whether type or individual X is or can be
+   equal to Y in the current context.  Returns :YES if X is known to
+   be equal to Y, :NO if X definitely cannot be equal to Y, and :MAYBE
+   otherwise.  For the :NO response, returns a second value, the split
+   or negation link that is causing the conflict."
+  (setq x (lookup-element-test x))
+  (setq y (lookup-element-test y))
+  (with-markers (m1)
+    (let ((err nil))
+      ;; Mark equals of X with M1.
+      (eq-scan x m1)
+      (cond
+	;; If Y is explicitly NOT an equal due to a negation link,
+	;; the answer is :NO.  Return the negation link as the second
+	;; value.
+	((marker-on? y (get-cancel-marker m1))
+	 (values
+	  :forbidden
+	  (find-not-eq-link y m1)))
+	;; If Y is marked as equal, the answer is :YES.
+	((marker-on? y m1)
+	 :yes)
+	;; If X and Y are on different branches of a split, the answer
+	;; is :NO.  Return the split as a second value.
+	((setq err (incompatible? x y))
 	   (values :no err))
-	  (t :maybe))))  
+	;; Otherwise, the answer is :MAYBE.
+	(t :maybe)))))
+
+(defun find-not-eq-link (node m1)
+  "NODE got tagged with a cancel-marker M1C during an eq-scan of
+   marker M1.  Find the not-eq link responsible, or one of them if there are
+   more than one."
+  (dolist (link (incoming-b-elements node))
+    (when (and (not-eq-link? link)
+	       (marker-on? (a-element link) m1))
+      (return-from find-not-eq-link link)))
+  (dolist (link (incoming-a-elements node))
+    (when (and (not-eq-link? link)
+	       (marker-on? (b-element link) m1))
+      (return-from find-not-eq-link link))))  
 
 ;;; ========================================================================
 (subsection "Basic List and Show Machinery")
@@ -6417,7 +6442,6 @@ English Names: ~20T~10:D
    this KB change."
   (setq element (lookup-element-test element))
   (english-internal element r)
-  (kb-log "(english-internal ~S '~S)~%" element r)
   element)
 
 (defun english-internal (element namelist)
@@ -6498,8 +6522,7 @@ English Names: ~20T~10:D
 	    (nconc definitions (list new2)))
       (set-element-property element
 			    :english-names
-			    (nconc element-names (list new1))
-			    t))))
+			    (nconc element-names (list new1))))))
 
 (defun unregister-definition (string
 			      element)
@@ -6789,7 +6812,6 @@ English Names: ~20T~10:D
       (error "Element ~S is not (yet) defined." target))
     (push (list tag source target) *deferred-connections*)))
 
-
 ;;; ***************************************************************************
 (section "KB Checkpointing and Persistence")
 ;;; ***************************************************************************
@@ -6935,48 +6957,6 @@ English Names: ~20T~10:D
 	    zone
 	    (if dst " (DST)" ""))))
 
-(defun start-kb-logging (&optional (filename "kb-log"))
-  "Starting now, for each change to the KB, write out a log entry to a
-   kb-log file.  If the system dies unexpectedly, we can restore the
-   current state of the system by reading in this log file using LOAD-KB.
-   We do not attempt to restore the state of the markers, which is
-   considered ephemeral.  If the system dies while writing out a log entry,
-   this mechanism still should work, though the last partial entry may be
-   lost.  Use *DEFAULT-KB-PATHNAME* to complete any unsupplied
-   components of the FILENAME."
-  (if *kb-logging-stream*
-      (commentary "Scone is already logging KB changes.")
-      ;;; Open and initialize the KB logging file.
-      (let* ((pathname
-	      (merge-pathnames filename *default-kb-pathname*)))
-	(setq *kb-logging-stream*
-	      (open pathname
-		    :direction :output
-		    :if-exists :supersede
-		    :external-format :utf8))
-	(kb-log "~&;;; Scone KB Logging File ~S~%" pathname)
-	(kb-log "~&;;; Opened on ~S.~2%" (current-time-string))
-	;; Note what files are loaded, so that when the log file is read
-	;; back in, this will be checked.
-	(kb-log "~&(check-loaded-files '~S)~%" 
-		(mapcar #'pathname-name *loaded-files*))
-	(kb-log "~&(new-iname-prefix ~A)~%" *iname-prefix*)
-	;; If there are new elements since the last LOAD-KB, dump them to the
-	;; log file.
-	(unless (eq (car *last-loaded-elements*) *last-element*)
-	  (commentary "Dumping all newly created elements to log file.")
-	  (do-elements (e (car *last-loaded-elements*))
-	    (dump-element e *kb-logging-stream*)))
-	(commentary "Scone is now logging KB changes.")
-	(values))))
-
-(defun end-kb-logging ()
-  (when *kb-logging-stream*
-    (kb-log "~%;;; End of KB logging file.  ~S~%" (current-time-string))
-    (close *kb-logging-stream*)
-    (commentary ";;; KB logging terminated.")
-    (values)))
-
 ;;; ***************************************************************************
 (section "Removing Elements from the KB")
 ;;; ***************************************************************************
@@ -7014,7 +6994,6 @@ English Names: ~20T~10:D
   ;; Remove E from name hashtables.
   (unregister-internal-name e)
   (unregister-all-names e)
-  (kb-log "(remove-element ~S)~%" e)
   *n-elements*)
 
 (defun remove-last-element ()
