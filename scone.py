@@ -110,6 +110,24 @@ class Scone(object):
         else:
             return 0
 
+    def create_task(self, new_task_name):
+        scone_input = "(new-type {%s} {task})" % new_task_name
+        res = self.communicate(scone_input)
+        if res is None:
+            return -1
+        else:
+            return 0
+
+    def task_requires_software(self, task_name, software_name):
+        scone_intput = '(new-statement {%s} {requires} (new-indv NIL {%s}))' % (task_name, software_name)
+        res = self.communicate(scone_intput)
+        if res is None:
+            return -1
+        else:
+            return 0
+
+    # def task_performed_by(self, task_name, user_name):
+
     def user_group_is_authorized_to_exec(self, user_group, softwares):
         for software in softwares:
             scone_input = "(new-statement {%s} {is authorized to execute} {%s})" % user_group, software
