@@ -162,6 +162,13 @@ class Scone(object):
             return -1
         return 0
 
+    def check_user_can_use_software(self, user_name, software_name, version):
+        scone_input = "(statement-true? {%s} {is authorized to execute} {%s})" % user_name, software_name + version
+        res = self.communicate(scone_input)
+        if res is None or res == "NIL":
+            return False
+        return True
+
     def run(self):
         daemon = Pyro4.Daemon()
         ns = Pyro4.locateNS()
