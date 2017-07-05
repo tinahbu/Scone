@@ -5,7 +5,8 @@ import Pyro4 as Pyro4
 from threading import RLock
 from subprocess import Popen, PIPE
 
-ERROR_MESSAGE = "\nERROR"   # we disable debug mode and hook it to a special sting
+ERROR_MESSAGE = "\nERROR"  # we disable debug mode and hook it to a special sting
+
 
 @Pyro4.expose
 class Scone(object):
@@ -22,7 +23,8 @@ class Scone(object):
         fcntl(self.sbcl_process.stdout, F_SETFL, flags | O_NONBLOCK)
         # skip all the output at the ver beginning
         print("**********SBCL init begins**********")
-        self.write_input("(defun debug-ignore (c h) (declare (ignore h))(declare (ignore c)) (print (format t \"~CERROR\" #\\linefeed)) (abort))")
+        self.write_input(
+            "(defun debug-ignore (c h) (declare (ignore h))(declare (ignore c)) (print (format t \"~CERROR\" #\\linefeed)) (abort))")
         self.write_input("(setf *debugger-hook* #'debug-ignore)")
         lines = self.read_output()
         for line in lines:
@@ -110,7 +112,14 @@ class Scone(object):
         else:
             return 0
 
-
+    def create_task(self, new_task_name):
+        # (new-indv {Shopping cart development} {task})
+        scone_input = ('(new-indv {%s} {task})' % new_task_name)
+        res = self.communicate(scone_input)
+        if res is None:
+            return -1
+        else:
+            return 0
 
     def create_user_group(self, new_group_name):
         return self.communicate("(new-type {" + new_group_name + "} {user})")
