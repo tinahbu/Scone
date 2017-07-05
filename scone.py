@@ -1,11 +1,11 @@
 from fcntl import fcntl, F_GETFL, F_SETFL
 from os import O_NONBLOCK
 from time import sleep
-import signal
 import Pyro4 as Pyro4
 from threading import RLock
 from subprocess import Popen, PIPE
 
+ERROR_MESSAGE = "\nERROR"   # we disable debug mode and hook it to a special sting
 
 @Pyro4.expose
 class Scone(object):
@@ -61,7 +61,7 @@ class Scone(object):
         self.write_input(my_input)
         self.lock.release()
         sleep(5)
-        return self.read_output()
+        return self.read_output().startswith(ERROR_MESSAGE)
 
     def interface1(self):
         self.lock.acquire()
@@ -79,7 +79,7 @@ class Scone(object):
         self.lock.release()
 
     def create_user_group(self, new_group_name):
-        self.communicate("(new-type {" + new_group_name + "} {user})")
+        return self.communicate("(new-type {" + new_group_name + "} {user})")
 
     def kill_sbcl(self, signum, frame):
         self.sbcl_process.kill()
