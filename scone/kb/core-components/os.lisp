@@ -55,3 +55,8 @@
 
 (new-type {software resources} {thing})
 (new-type-role {version of software resources} {software resources} {string})
+
+(new-relation {is performing} :a-type-of {user} :b-type-of {task} :transitive T)
+(new-relation {requires} :a-type-of {task} :b-type-of {software resources} :transitive T)
+(new-relation {is authorized to execute} :a-type-of {user} :b-type-of {software resources} :transitive T)
+(new-relation {depends on} :a-type-of {software resources} :b-type-of {software resources} :transitive T)
