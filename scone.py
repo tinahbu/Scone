@@ -22,6 +22,8 @@ class Scone(object):
         fcntl(self.sbcl_process.stdout, F_SETFL, flags | O_NONBLOCK)
         # skip all the output at the ver beginning
         print("**********SBCL init begins**********")
+        self.write_input("(defun debug-ignore (c h) (declare (ignore h))(declare (ignore c)) (print (format t \"~CERROR\" #\\linefeed)) (abort))")
+        self.write_input("(setf *debugger-hook* #'debug-ignore)")
         lines = self.read_output()
         for line in lines:
             print(line)
@@ -31,8 +33,6 @@ class Scone(object):
         self.write_input('(load "scone/scone-loader.lisp")')
         self.write_input('(scone "")')
         self.write_input('(load-kb "core")')
-        self.write_input('(defun debug-ignore (c h) (declare (ignore h)) (print c) (abort))')
-        self.write_input('(setf *debugger-hook* #\'debug-ignore)')
         # TODO Need to find a better way to determine whether we reach the end
         sleep(2)
         lines = self.read_output()
@@ -57,7 +57,9 @@ class Scone(object):
         return lines
 
     def communicate(self, my_input):
+        self.lock.acquire()
         self.write_input(my_input)
+        self.lock.release()
         sleep(5)
         return self.read_output()
 
@@ -77,10 +79,7 @@ class Scone(object):
         self.lock.release()
 
     def create_user_group(self, new_group_name):
-
-        self.lock.acquire()
         self.communicate("(new-type {" + new_group_name + "} {user})")
-        self.lock.release()
 
     def kill_sbcl(self, signum, frame):
         self.sbcl_process.kill()
