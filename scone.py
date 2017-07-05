@@ -62,9 +62,10 @@ class Scone(object):
         self.lock.release()
         sleep(5)
         res = self.read_output()
-        if (res.startswith(ERROR_MESSAGE)):
+        if res.startswith(ERROR_MESSAGE):
             return None
-        return res
+        else:
+            return res
 
     def interface1(self):
         self.lock.acquire()
@@ -81,11 +82,14 @@ class Scone(object):
         print 456
         self.lock.release()
 
+    def create_software(self, new_software_name, dependencies):
+        res = self.communicate("(new-type {" + new_software_name + "} {software resources})")
+        if res is None:
+            return "Software already exists"
+
+
     def create_user_group(self, new_group_name):
         return self.communicate("(new-type {" + new_group_name + "} {user})")
-
-    def kill_sbcl(self, signum, frame):
-        self.sbcl_process.kill()
 
     def run(self):
         daemon = Pyro4.Daemon()
