@@ -61,7 +61,10 @@ class Scone(object):
         self.write_input(my_input)
         self.lock.release()
         sleep(5)
-        return self.read_output().startswith(ERROR_MESSAGE)
+        res = self.read_output()
+        if (res.startswith(ERROR_MESSAGE)):
+            return None
+        return res
 
     def interface1(self):
         self.lock.acquire()
