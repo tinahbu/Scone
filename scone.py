@@ -82,10 +82,34 @@ class Scone(object):
         print 456
         self.lock.release()
 
-    def create_software(self, new_software_name, dependencies):
-        res = self.communicate("(new-type {" + new_software_name + "} {software resources})")
+    def create_software(self, new_software_name):
+        # (new-type {Apache} {software resources})
+        scone_input = "(new-type {%s} {software resources})" % new_software_name
+        res = self.communicate(scone_input)
         if res is None:
-            return "Software already exists"
+            return -1
+        return 0
+
+    def add_software_dependencies(self, software_name, dependencies):
+        res = []
+        for dep_item in dependencies:
+            # (new-statement {BLAS} {depends on} {Fortran})
+            scone_input = "(new-statement {%s} {depends on} {%s})" % (software_name, dep_item)
+            res = self.communicate(scone_input)
+            if res is None:
+                res.append(dep_item)
+        return res
+
+    def add_software_version(self, software_name, new_version):
+        # (x-is-the-y-of-z (new-string {"1.55"}) {version of software resources} {Boost 1.55})
+        scone_input = ('(x-is-the-y-of-z (new-string {%s}) {version of software resources} {%s %s})'
+                       % (new_version, software_name, new_version))
+        res = self.communicate(scone_input)
+        if res is None:
+            return -1
+        else:
+            return 0
+
 
 
     def create_user_group(self, new_group_name):
