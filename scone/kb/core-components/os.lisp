@@ -47,6 +47,7 @@
 ;;; preload KB
 ;;; 3 Main Components as type node
 (new-type {user} {person})
+(new-type {default user} {user})
 (new-indv-role {userid of user} {user} {string})
 (new-indv-role {username of user} {user} {string})
 (new-indv-role {email of user} {user} {string})

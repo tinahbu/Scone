@@ -110,10 +110,39 @@ class Scone(object):
         else:
             return 0
 
+    def user_group_is_authorized_to_exec(self, user_group, softwares):
+        for software in softwares:
+            scone_input = "(new-statement {%s} {is authorized to execute} {%s})" % user_group, software
+            if self.communicate(scone_input) is None:   # TODO: rollback all authorization of not?
+                return -1
+        return 0
 
+    def assign_user_to_groups(self, user_name, group_names):  # only add group for now
+        for group_name in group_names:
+            scone_input = "(new-indv {%s} {%s})" % user_name, group_name
+            if self.communicate(scone_input) is None:   # TODO: rollback all assignment of not?
+                return -1
+        return 0
+
+    def create_user(self, user_name, user_id, user_email):
+        scone_inputs = ["(new-type {%s} {default user})" % user_name,
+                        "(x-is-the-y-of-z (new-string {\"{%s}\"}) {username of user} {%s})" % (user_name, user_name),
+                        "(x-is-the-y-of-z (new-string {\"{%s}\"}) {email of user} {%s})" % (user_email, user_name),
+                        "(x-is-the-y-of-z (new-string {\"{%s}\"}) {userid of user} {%s})" % (user_id, user_name)]
+        for i, scone_input in enumerate(scone_inputs):
+            if self.communicate(scone_input) is None:
+                if i is 0:
+                    return -1
+                else:
+                    self.communicate("(remove-element {%s})" % user_name)
+        return 0
 
     def create_user_group(self, new_group_name):
-        return self.communicate("(new-type {" + new_group_name + "} {user})")
+        scone_input = "(new-type {%s} {user})" % new_group_name
+        res = self.communicate(scone_input)
+        if res is None:
+            return -1
+        return 0
 
     def run(self):
         daemon = Pyro4.Daemon()
