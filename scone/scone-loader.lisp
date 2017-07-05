@@ -60,7 +60,7 @@
 
 (defun scone (&optional (version "scone-git"))
   (setq *version* version)
-  (setq *default-kb-pathname* 
+  (setq *default-kb-pathname*
     (format nil "scone/kb/anonymous.lisp"
 	    *version*))
   (load (format nil "scone/engine"
@@ -74,4 +74,3 @@
   (values))
 
 (format t "~2%;;; Call (scone \"some-version-name\") to start Scone.~%")
-

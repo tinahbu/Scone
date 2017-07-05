@@ -31,6 +31,8 @@ class Scone(object):
         self.write_input('(load "scone/scone-loader.lisp")')
         self.write_input('(scone "")')
         self.write_input('(load-kb "core")')
+        self.write_input('(defun debug-ignore (c h) (declare (ignore h)) (print c) (abort))')
+        self.write_input('(setf *debugger-hook* #\'debug-ignore)')
         # TODO Need to find a better way to determine whether we reach the end
         sleep(2)
         lines = self.read_output()
@@ -54,6 +56,11 @@ class Scone(object):
             lines.append(line)
         return lines
 
+    def communicate(self, my_input):
+        self.write_input(my_input)
+        sleep(5)
+        return self.read_output()
+
     def interface1(self):
         self.lock.acquire()
         self.write_input('(is-x-a-y? {operating system of Macbook_1} {Linux})')
@@ -67,6 +74,12 @@ class Scone(object):
     def interface2(self):
         self.lock.acquire()
         print 456
+        self.lock.release()
+
+    def create_user_group(self, new_group_name):
+
+        self.lock.acquire()
+        self.communicate("(new-type {" + new_group_name + "} {user})")
         self.lock.release()
 
     def kill_sbcl(self, signum, frame):
