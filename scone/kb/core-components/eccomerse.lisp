@@ -23,6 +23,7 @@
 (new-indv-role {userid of user} {user} {string})
 (new-indv-role {username of user} {user} {string})
 (new-indv-role {email of user} {user} {string})
+(new-type-role {member of user} {user} {user})
 
 ;;; Create New User Groups
 (new-type {frontend developer} {user})
@@ -30,9 +31,14 @@
 (new-type {data scientist} {user})
 
 ;;; Create New Individual Users
-(new-indv {user 1} {frontend developer}) 
-(new-indv {user 2} {backend developer})
-(new-indv {user 3} {data scientist})
+(new-indv {user 1} {user})
+(x-is-a-y-of-z {user 1} {member of user} {frontend developer})
+
+(new-indv {user 2} {user})
+(x-is-a-y-of-z {user 2} {member of user} {backend developer})
+
+(new-indv {user 3} {user})
+(x-is-a-y-of-z {user 3} {member of user} {data scientist})
 
 ;;;
 ;;; TASK
@@ -231,7 +237,7 @@
 
 ;;; Vulnerability check without verison. Users that are impacted by the
 ;;; certain software will be printed.
-;;; Example: (user_check_vulnerability_equal {OpenSSL})
+;;; Example: (user_check_vulnerability {OpenSSL})
 (defun user_check_vulnerability (software);;; version exactly equal
   (setq userList '())
   (with-markers (m1 m2)
@@ -252,7 +258,7 @@
 
 ;;; Vulnerability check without verison. Tasks that are impacted by the
 ;;; certain software will be printed.
-;;; Example: (task_check_vulnerability_equal {OpenSSL})
+;;; Example: (task_check_vulnerability {OpenSSL})
 (defun task_check_vulnerability (software)
   (setq taskList '())
   (with-markers (m1 m2)
@@ -269,7 +275,7 @@
 
 ;;; Vulnerability check without verison. Softwares that are impacted by the
 ;;; certain software will be printed.
-;;; Example: (software_check_vulnerability_equal {OpenSSL})
+;;; Example: (software_check_vulnerability {OpenSSL})
 
 (defun software_check_vulnerability (software)
   (setq softwareList '())
@@ -576,20 +582,27 @@
   (loop for x in softwareList do (print x))  
 )
 
-
 ;;; Given a user and a task, print a list of softwares that 
 ;;; the user is not yet authorized to execute.
 ;;; Example: (access_check {user 1} {CNN for product recommendation})
 (defun access_check (user task)
   (setq softwareList '())
-  (with-markers (m1 m2 m3)
+  (setq tmp '())
+  (with-markers (m1 m2 m3 m4 m5 m6)
     (progn
       (mark-rel {requires} task m1) ;;;Expresso
+      ;;; query the authorization given to the user
       (mark-rel {is authorized to execute} user m2) ;;;{python}, {python 3.0}, {python 2.7}
-      (mark-boolean m3 (list m1) (list m2))
+      ;;; query the authorization given to the group the user belongs to
+      (mark-role-inverse {member of user} user m3)
       (do-marked (x m3)
-        (setq softwareList (nconc softwareList (list x)))
+        (setq tmp (nconc tmp (list-rel {is authorized to execute}  m4)))
       )
+      (loop for x in tmp do (mark x m5)) 
+      (mark-boolean m6 (list m1) (list m2 m5))
+      (do-marked (x m6)
+        (setq softwareList (nconc softwareList (list x)))
+      )      
     )
   )
   (loop for x in softwareList do (print x))
