@@ -25,7 +25,7 @@ def bootstrap_ns():
 def main():
     Process(target=bootstrap_ns).start()
     Process(target=run_scone).start()
-    sleep(5)  # wait enough time to make sure scone service is registered
+    sleep(10)  # wait enough time to make sure scone service is registered
     Process(target=run_state_modifier).start()
     Process(target=run_state_inquirer).start()
 
