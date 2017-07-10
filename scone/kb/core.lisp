@@ -143,7 +143,7 @@
 ;;;; ----------------------------------------------------------------------
 ;;;; BASIC OS KB
 
-;;; General knowledge of os information.
+;;; General knowledge of a eccomerse model that designed by MITS-Scone team
 
-(load-kb "core-components/os")
+(load-kb "core-components/eccomerse")
 
