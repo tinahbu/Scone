@@ -15,17 +15,17 @@ class Scone(object):
         # cmd.
         # to enter input and outpt
         self.sbcl_process = Popen(['./sbcl/run-sbcl.sh'], stdout=PIPE, stdin=PIPE, stderr=PIPE, shell=True)
-        # sleep(2)
-        # # get get current stdout flags
-        # flags = fcntl(self.sbcl_process.stdout, F_GETFL)
-        # # set stdout to non-blocking
-        # fcntl(self.sbcl_process.stdout, F_SETFL, flags | O_NONBLOCK)
+        sleep(2)
+        # get get current stdout flags
+        flags = fcntl(self.sbcl_process.stdout, F_GETFL)
+        # set stdout to non-blocking
+        fcntl(self.sbcl_process.stdout, F_SETFL, flags | O_NONBLOCK)
         # skip all the output at the ver beginning
         print("**********SBCL init begins**********")
         self.raw_write_input("(defun debug-ignore (c h) (declare (ignore h))(declare (ignore c)) (print (format t \"~CERROR\" #\\linefeed)) (abort))")
         self.raw_write_input("(setf *debugger-hook* #'debug-ignore)")
         print("**********SBCL init ends**********")
-        print('')
+
         print("**********Scone init begins**********")
         self.raw_write_input('(load "scone/scone-loader.lisp")')
         self.raw_write_input('(scone "")')
@@ -36,6 +36,7 @@ class Scone(object):
         for line in lines:
             print(line)
         print("**********Scone init ends**********")
+        fcntl(self.sbcl_process.stdout, F_SETFL, flags)
 
     def raw_write_input(self, raw_input):
         self.sbcl_process.stdin.write(raw_input + "\n")
@@ -48,10 +49,14 @@ class Scone(object):
     def read_output(self):
         lines = []
         while True:
-            line = self.sbcl_process.stdout.readline()
-            if line == '"FINISH"':
+            try:
+                line = self.sbcl_process.stdout.readline()
+            except IOError:
                 break
-            lines.append(line)
+            if line.startswith('"FINISH"'):
+                break
+            if not line.startswith('*'):
+                lines.append(line)
         return lines
 
     def communicate(self, my_input):
@@ -59,7 +64,7 @@ class Scone(object):
         self.write_input(my_input)
         self.lock.release()
         res = self.read_output()
-        if res is None or res[0].startswith(ERROR_MESSAGE):
+        if res[0].startswith(ERROR_MESSAGE):
             return None
         else:
             return res
@@ -77,11 +82,12 @@ class Scone(object):
         self.lock.release()
 
     def create_software(self, new_software_name):
-        # (new-type {Apache} {software resources})
         scone_input = "(new-type {%s} {software resources})" % new_software_name
         res = self.communicate(scone_input)
         if res is None:
             return -1
+        # for line in res:
+        #     print(line)
         return 0
 
     def add_software_dependencies(self, software_name, dependencies):

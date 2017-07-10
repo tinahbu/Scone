@@ -9,6 +9,6 @@ class StateInquirer(object):
         while True:
             SCONE = self.scone
             # do with scone
-            SCONE.interface2()
+            # SCONE.interface2()
             break
 

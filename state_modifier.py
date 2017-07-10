@@ -22,6 +22,7 @@ class StateModifier(object):
                     print("%s => %s" % (key, val))
 
             # do with scone
-            SCONE.interface1()
+            SCONE.create_software("Left4Dead")
+            SCONE.create_software("WoW")
             break
 
