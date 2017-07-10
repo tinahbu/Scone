@@ -575,3 +575,22 @@
   )
   (loop for x in softwareList do (print x))  
 )
+
+
+;;; Given a user and a task, print a list of softwares that 
+;;; the user is not yet authorized to execute.
+;;; Example: (access_check {user 1} {CNN for product recommendation})
+(defun access_check (user task)
+  (setq softwareList '())
+  (with-markers (m1 m2 m3)
+    (progn
+      (mark-rel {requires} task m1) ;;;Expresso
+      (mark-rel {is authorized to execute} user m2) ;;;{python}, {python 3.0}, {python 2.7}
+      (mark-boolean m3 (list m1) (list m2))
+      (do-marked (x m3)
+        (setq softwareList (nconc softwareList (list x)))
+      )
+    )
+  )
+  (loop for x in softwareList do (print x))
+)
