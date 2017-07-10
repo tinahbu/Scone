@@ -7141,4 +7141,7 @@ English Names: ~20T~10:D
 	      (format t "~% ~S" loser))
 	    t)))))
 
- 
+(defun scone-call (command)
+  (print (eval command))
+  "FINISH"
+)
