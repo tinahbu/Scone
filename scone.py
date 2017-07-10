@@ -55,8 +55,8 @@ class Scone(object):
                 break
             if line.startswith('"FINISH"'):
                 break
-            if not line.startswith('*'):
-                lines.append(line)
+            if not line.startswith('*') and not line.startswith('\n'):
+                lines.append(line.strip())
         return lines
 
     def communicate(self, my_input):
@@ -86,8 +86,8 @@ class Scone(object):
         res = self.communicate(scone_input)
         if res is None:
             return -1
-        # for line in res:
-        #     print(line)
+        for line in res:
+            print(line)
         return 0
 
     def add_software_dependencies(self, software_name, dependencies):
