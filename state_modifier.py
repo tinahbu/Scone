@@ -22,7 +22,13 @@ class StateModifier(object):
                     print("%s => %s" % (key, val))
 
             # do with scone
-            SCONE.create_software("Left4Dead")
-            SCONE.create_software("WoW")
+            ret = SCONE.user_create_task("Qiaoyu's task")
+            print ret
+            ret = SCONE.user_create_task("Shopping cart development")
+            print ret
+
+            ret = SCONE.user_task_requires_software("Qiaoyu's task", ["123", "456"])
+            print ret
+            print "end!"
             break
 
