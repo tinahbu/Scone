@@ -23,6 +23,7 @@
 (new-indv-role {userid of user} {user} {string})
 (new-indv-role {username of user} {user} {string})
 (new-indv-role {email of user} {user} {string})
+(new-type-role {member of user} {user} {user})
 
 ;;; Create New User Groups
 (new-type {frontend developer} {user})
@@ -30,9 +31,14 @@
 (new-type {data scientist} {user})
 
 ;;; Create New Individual Users
-(new-indv {user 1} {frontend developer}) 
-(new-indv {user 2} {backend developer})
-(new-indv {user 3} {data scientist})
+(new-indv {user 1} {user})
+(x-is-a-y-of-z {user 1} {member of user} {frontend developer})
+
+(new-indv {user 2} {user})
+(x-is-a-y-of-z {user 2} {member of user} {backend developer})
+
+(new-indv {user 3} {user})
+(x-is-a-y-of-z {user 3} {member of user} {data scientist})
 
 ;;;
 ;;; TASK
@@ -231,7 +237,7 @@
 
 ;;; Vulnerability check without verison. Users that are impacted by the
 ;;; certain software will be printed.
-;;; Example: (user_check_vulnerability_equal {OpenSSL})
+;;; Example: (user_check_vulnerability {OpenSSL})
 (defun user_check_vulnerability (software);;; version exactly equal
   (setq userList '())
   (with-markers (m1 m2)
@@ -240,36 +246,27 @@
       (do-marked (x m1)
         (mark-rel-inverse {requires} x m2)
         (do-marked (y m2) 
-          (setq userList (nconc userList (list-rel-inverse {is performing} y)))
-        )
-      )
-    )
-  )
+          (setq userList (nconc userList (list-rel-inverse {is performing} y)))))))
   (loop for x in userList do (print x))
 )
 
 
-
 ;;; Vulnerability check without verison. Tasks that are impacted by the
 ;;; certain software will be printed.
-;;; Example: (task_check_vulnerability_equal {OpenSSL})
+;;; Example: (task_check_vulnerability {OpenSSL})
 (defun task_check_vulnerability (software)
   (setq taskList '())
   (with-markers (m1 m2)
     (progn
       (mark-rel-inverse {depends on} software m1) 
       (do-marked (x m1)
-        (setq taskList (nconc taskList (list-rel-inverse {requires} x)))
-      )
-    )
-  )
+        (setq taskList (nconc taskList (list-rel-inverse {requires} x))))))
   (loop for x in taskList do (print x))
 )  
 
-
 ;;; Vulnerability check without verison. Softwares that are impacted by the
 ;;; certain software will be printed.
-;;; Example: (software_check_vulnerability_equal {OpenSSL})
+;;; Example: (software_check_vulnerability {OpenSSL})
 
 (defun software_check_vulnerability (software)
   (setq softwareList '())
@@ -289,8 +286,7 @@
       (do-marked (x m1)
         ;;; Get all the version number
         (setq softwareVersion 
-          (node-value (the-x-of-y {version of software resources} x))
-        )
+          (node-value (the-x-of-y {version of software resources} x)))
         (setq tmp (string< softwareVersion version))
         (if (not tmp)
           ;;; softwareVersion is greater or equal/newer than given version
@@ -303,14 +299,7 @@
               (mark-rel-inverse {requires} y m3)
               (do-marked (z m3) 
                 ;;; Query for all the {user} that {is performing} the potentially impacted {tasks}
-                (setq userList (nconc userList (list-rel-inverse {is performing} z)))
-              )
-            )
-          )
-        )
-      )
-    )
-  )
+                (setq userList (nconc userList (list-rel-inverse {is performing} z))))))))))
   (loop for x in userList do (print x))  
 )
 
@@ -327,8 +316,7 @@
       (do-marked (x m1)
         ;;; Get all the version number
         (setq softwareVersion 
-          (node-value (the-x-of-y {version of software resources} x))
-        )
+          (node-value (the-x-of-y {version of software resources} x)))
         (setq tmp (string< softwareVersion version))
         (if (not tmp)
           ;;; softwareVersion is greater or equal/newer than given version
@@ -338,13 +326,7 @@
             (mark-rel-inverse {depends on} x m2)
             (do-marked (y m2)
               ;;; Query for all the {task} that {requires} the potentially impacted {software resource}
-              (setq taskList (nconc taskList (list-rel-inverse {requires} y)))
-            )
-          )
-        )
-      )
-    )
-  )
+              (setq taskList (nconc taskList (list-rel-inverse {requires} y)))))))))
   (loop for x in taskList do (print x))  
 )
 
@@ -361,25 +343,20 @@
       (do-marked (x m1)
         ;;; Get all the version number
         (setq softwareVersion 
-          (node-value (the-x-of-y {version of software resources} x))
-        )
+          (node-value (the-x-of-y {version of software resources} x)))
         (setq tmp (string< softwareVersion version))
         (if (not tmp)
           ;;; softwareVersion is greater or equal/newer than given version
           ()
           ;;; softwareVersion is smaller/older than given version 
-          (setq softwareList (nconc softwareList (list-rel-inverse {depends on} x)))
-        )
-      )
-    )
-  )
+          (setq softwareList (nconc softwareList (list-rel-inverse {depends on} x)))))))
   (loop for x in softwareList do (print x))  
 )
 
 ;;; Vulnerability check WITH verison. 
 ;;; Given a certain version, users that are impacted by the NEWER version (not included)
 ;;; are printed.
-;;; Example: (user_check_vulnerability_newer {python} "3.0")
+;;; Example: (user_check_vulnerability_newer {python} "2.7")
 
 (defun user_check_vulnerability_newer (software version)
   (setq userList '())
@@ -389,8 +366,7 @@
       (do-marked (x m1)
         ;;; Get all the version number
         (setq softwareVersion 
-          (node-value (the-x-of-y {version of software resources} x))
-        )
+          (node-value (the-x-of-y {version of software resources} x)))
         (setq tmp (string> softwareVersion version))
         (if (not tmp)
           ;;; softwareVersion is older or equal than given version
@@ -403,14 +379,7 @@
               (mark-rel-inverse {requires} y m3)
               (do-marked (z m3) 
                 ;;; Query for all the {user} that {is performing} the potentially impacted {tasks}
-                (setq userList (nconc userList (list-rel-inverse {is performing} z)))
-              )
-            )
-          )
-        )
-      )
-    )
-  )
+                (setq userList (nconc userList (list-rel-inverse {is performing} z))))))))))
   (loop for x in userList do (print x))  
 )
 
@@ -427,8 +396,7 @@
       (do-marked (x m1)
         ;;; Get all the version number
         (setq softwareVersion 
-          (node-value (the-x-of-y {version of software resources} x))
-        )
+          (node-value (the-x-of-y {version of software resources} x)))
         (setq tmp (string> softwareVersion version))
         (if (not tmp)
           ;;; softwareVersion is older or equal than given version
@@ -438,13 +406,7 @@
             (mark-rel-inverse {depends on} x m2)
             (do-marked (y m2)
               ;;; Query for all the {task} that {requires} the potentially impacted {software resource}
-              (setq taskList (nconc taskList (list-rel-inverse {requires} y)))
-            )
-          )
-        )
-      )
-    )
-  )
+              (setq taskList (nconc taskList (list-rel-inverse {requires} y)))))))))
   (loop for x in taskList do (print x))  
 )
 
@@ -461,18 +423,13 @@
       (do-marked (x m1)
         ;;; Get all the version number
         (setq softwareVersion 
-          (node-value (the-x-of-y {version of software resources} x))
-        )
+          (node-value (the-x-of-y {version of software resources} x)))
         (setq tmp (string> softwareVersion version))
         (if (not tmp)
           ;;; softwareVersion is older or equal than given version
           ()
           ;;; softwareVersion is newer than given version 
-          (setq softwareList (nconc softwareList (list-rel-inverse {depends on} x)))
-        )
-      )
-    )
-  )
+          (setq softwareList (nconc softwareList (list-rel-inverse {depends on} x)))))))
   (loop for x in softwareList do (print x))  
 )
 
@@ -490,8 +447,7 @@
       (do-marked (x m1)
         ;;; Get all the version number
         (setq softwareVersion 
-          (node-value (the-x-of-y {version of software resources} x))
-        )
+          (node-value (the-x-of-y {version of software resources} x)))
         (if (string= softwareVersion version)
           ;;; softwareVersion is equal to the given version
           (progn
@@ -501,16 +457,10 @@
               (mark-rel-inverse {requires} y m3)
               (do-marked (z m3) 
                 ;;; Query for all the {user} that {is performing} the potentially impacted {tasks}
-                (setq userList (nconc userList (list-rel-inverse {is performing} z)))
-              )
-            )
-          )
+                (setq userList (nconc userList (list-rel-inverse {is performing} z))))))
           ;;; softwareVersion is not equal to the given version 
           ()
-        )
-      )
-    )
-  )
+        ))))
   (loop for x in userList do (print x))  
 )
 
@@ -528,23 +478,17 @@
       (do-marked (x m1)
         ;;; Get all the version number
         (setq softwareVersion 
-          (node-value (the-x-of-y {version of software resources} x))
-        )
+          (node-value (the-x-of-y {version of software resources} x)))
         (if (string-equal softwareVersion version)
           ;;; softwareVersion is equal to the given version
           (progn
             (mark-rel-inverse {depends on} x m2)
             (do-marked (y m2)
               ;;; Query for all the {task} that {requires} the potentially impacted {software resource}
-              (setq taskList (nconc taskList (list-rel-inverse {requires} y)))
-            )
-          )
+              (setq taskList (nconc taskList (list-rel-inverse {requires} y)))))
           ;;; softwareVersion is not equal to the given version
           ()
-        )
-      )
-    )
-  )
+        ))))
   (loop for x in taskList do (print x))  
 )
 
@@ -569,28 +513,45 @@
           (setq softwareList (nconc softwareList (list-rel-inverse {depends on} x)))
           ;;; softwareVersion is newer than given version 
           ()
-        )
-      )
-    )
-  )
+        ))))
   (loop for x in softwareList do (print x))  
 )
-
 
 ;;; Given a user and a task, print a list of softwares that 
 ;;; the user is not yet authorized to execute.
 ;;; Example: (access_check {user 1} {CNN for product recommendation})
+; (defun access_check (user task)
+;   (setq softwareList '())
+;   (setq tmp '())
+;   (with-markers (m1 m2 m3 m4 m5 m6)
+;     (progn
+;       (mark-rel {requires} task m1) ;;; {Expresso}
+;       ;;; query the authorization given to the user
+;       (mark-rel {is authorized to execute} user m2) ;;; {python}, {python 3.0}, {python 2.7}
+;       ;;; query the authorization given to the group the user belongs to
+;       (mark-role-inverse {member of user} user m3)
+;       (do-marked (x m3)
+;         (setq tmp (nconc tmp (list-rel {is authorized to execute} m4)))
+;       )
+;       (free-marker m4)
+;       (loop for x in tmp do (mark x m5)) 
+;       (mark-boolean m6 (list m1) (list m2 m5))
+
+;       (do-marked (x m6)
+;         (setq softwareList (nconc softwareList (list x)))
+;       )
+;     )
+;   )
+;   (loop for x in softwareList do (print x))
+; )
+
 (defun access_check (user task)
   (setq softwareList '())
-  (with-markers (m1 m2 m3)
+  (setq tmp '())
+  (with-markers (m1)
     (progn
-      (mark-rel {requires} task m1) ;;;Expresso
-      (mark-rel {is authorized to execute} user m2) ;;;{python}, {python 3.0}, {python 2.7}
-      (mark-boolean m3 (list m1) (list m2))
-      (do-marked (x m3)
-        (setq softwareList (nconc softwareList (list x)))
-      )
-    )
-  )
-  (loop for x in softwareList do (print x))
-)
+      (mark-rel {requires} task m1) ;;; {Expresso}
+      (do-marked (x m1)
+        (setq y (statement-true? user {is authorized to execute} x))
+        (if (string= y "T") () (setq softwareList (nconc softwareList (list x)))))
+  (loop for x in softwareList do (print x)))))
