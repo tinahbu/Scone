@@ -101,7 +101,7 @@ class Scone(object):
     Create new_software_name with provided versions in version_list
         Create new_software_name if not exist
         Create new_software_name_version
-        Return list of  new_software_name_version
+        Return list of  new_software_name_version if success
     """
     def create_software(self, new_software_name, version_list=[]):
         rv = []
@@ -146,15 +146,30 @@ class Scone(object):
                 res = self.communicate(scone_input)
         return rv
 
+
+    """
+    Add a new version to an existing software, if the software does not exist, return -1
+    If success, return 0, if the new_version is already in KB, return 1
+    """
     def add_software_version(self, software_name, new_version):
         # (x-is-the-y-of-z (new-string {"1.55"}) {version of software resources} {Boost 1.55})
-        scone_input = ('(x-is-the-y-of-z (new-string {%s}) {version of software resources} {%s %s})'
+        scone_input = "(type-node? {%s})" % software_name
+        res = self.communicate(scone_input)
+        if res is None or res[0] == "NIL":
+            return -1
+
+        if self.create_software(software_name, [new_version]) == -1:
+            rv = 1
+        else:
+            rv = 0
+
+        scone_input = ('(x-is-the-y-of-z (new-string {%s}) {version of software resources} {%s_%s})'
                        % (new_version, software_name, new_version))
         res = self.communicate(scone_input)
         if res is None:
             return -1
         else:
-            return 0
+            return rv
 
     """
     Create a individual task from task type
