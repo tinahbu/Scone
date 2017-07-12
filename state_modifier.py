@@ -29,6 +29,9 @@ class StateModifier(object):
 
             ret = SCONE.user_task_requires_software("Qiaoyu's task", ["123", "456"])
             print ret
+
+            ret = SCONE.task_performed_by("CNN for product recommendation", "user 1")
+            print ret
             print "end!"
             break
 
