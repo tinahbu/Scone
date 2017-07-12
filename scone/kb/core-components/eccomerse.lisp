@@ -25,29 +25,6 @@
 (new-indv-role {email of user} {user} {string})
 (new-type-role {member of user} {user} {user})
 
-;;; Create New User Groups
-(new-type {frontend developer} {user})
-(new-type {backend developer} {user})
-(new-type {data scientist} {user})
-
-;;; Create New Individual Users
-(new-indv {user 1} {user})
-(x-is-a-y-of-z {user 1} {member of user} {frontend developer})
-
-(new-indv {user 2} {user})
-(x-is-a-y-of-z {user 2} {member of user} {backend developer})
-
-(new-indv {user 3} {user})
-(x-is-a-y-of-z {user 3} {member of user} {data scientist})
-
-;;;
-;;; TASK
-;;;
-;;; Create New Individual Tasks
-(new-indv {Shopping cart development} {task})
-(new-indv {CNN for product recommendation} {task})
-(new-indv {Apache server configure} {task})
-
 ;;;
 ;;; SOFTWARE RESOURCES
 ;;;
@@ -61,17 +38,17 @@
 (new-type {ANSI C} {software resources})
 (new-type {BLAS} {software resources})
 (new-type {Boost} {software resources})
-(new-type {Boost 1.55} {Boost})
+(new-type {Boost-1.55} {Boost})
 (new-type {Caffe} {software resources})
 (new-type {Composer} {software resources})
 (new-type {cookie} {software resources})
 (new-type {C} {software resources})
 (new-type {coreutils} {software resources})
 (new-type {CUDA} {software resources})
-(new-type {CUDA 5.0} {CUDA})
-(new-type {CUDA 5.5} {CUDA})
-(new-type {CUDA 6.0} {CUDA})
-(new-type {CUDA 7.0} {CUDA})
+(new-type {CUDA-5.0} {CUDA})
+(new-type {CUDA-5.5} {CUDA})
+(new-type {CUDA-6.0} {CUDA})
+(new-type {CUDA-7.0} {CUDA})
 (new-type {C++} {software resources})
 (new-type {debug} {software resources})
 (new-type {Expresso} {software resources})
@@ -96,16 +73,16 @@
 (new-type {Node.js} {software resources})
 (new-type {npm} {software resources})
 (new-type {OpenCV} {software resources})
-(new-type {OpenCV 2.4} {OpenCV})
-(new-type {OpenCV 3.0} {OpenCV})
+(new-type {OpenCV-2.4} {OpenCV})
+(new-type {OpenCV-3.0} {OpenCV})
 (new-type {OpenSSL} {software resources})
 (new-type {tornado} {software resources})
 (new-type {path} {software resources})
 ;;; (new-type {process} {software resources}) ;;;Error, process has already been used in Scone
 (new-type {protobuf} {software resources})
 (new-type {python} {software resources})
-(new-type {python 2.7} {python})
-(new-type {python 3.0} {python})
+(new-type {python-2.7} {python})
+(new-type {python-3.0} {python})
 (new-type {PHP} {software resources})
 (new-type {snappy} {software resources})
 (new-type {util} {software resources})
@@ -120,16 +97,21 @@
 (new-type {Maven} {software resources})
 (new-type {C Std library} {software resources})
 
+(new-type {httplib} {software resources})
+(new-type {urllib} {software resources})
+(new-type {urllib2} {software resources})
+(new-type {xmlrpclib} {software resources})
+
 ;;; Assign Version Value to Software's {version of software resources} role node
-(x-is-the-y-of-z (new-string {"1.55"}) {version of software resources} {Boost 1.55})
-(x-is-the-y-of-z (new-string {"5.0"}) {version of software resources} {CUDA 5.0})
-(x-is-the-y-of-z (new-string {"5.5"}) {version of software resources} {CUDA 5.5})
-(x-is-the-y-of-z (new-string {"6.0"}) {version of software resources} {CUDA 6.0})
-(x-is-the-y-of-z (new-string {"7.0"}) {version of software resources} {CUDA 7.0})
-(x-is-the-y-of-z (new-string {"2.4"}) {version of software resources} {OpenCV 2.4})
-(x-is-the-y-of-z (new-string {"3.0"}) {version of software resources} {OpenCV 3.0})
-(x-is-the-y-of-z (new-string {"2.7"}) {version of software resources} {python 2.7})
-(x-is-the-y-of-z (new-string {"3.0"}) {version of software resources} {python 3.0})
+(x-is-the-y-of-z (new-string {"1.55"}) {version of software resources} {Boost-1.55})
+(x-is-the-y-of-z (new-string {"5.0"}) {version of software resources} {CUDA-5.0})
+(x-is-the-y-of-z (new-string {"5.5"}) {version of software resources} {CUDA-5.5})
+(x-is-the-y-of-z (new-string {"6.0"}) {version of software resources} {CUDA-6.0})
+(x-is-the-y-of-z (new-string {"7.0"}) {version of software resources} {CUDA-7.0})
+(x-is-the-y-of-z (new-string {"2.4"}) {version of software resources} {OpenCV-2.4})
+(x-is-the-y-of-z (new-string {"3.0"}) {version of software resources} {OpenCV-3.0})
+(x-is-the-y-of-z (new-string {"2.7"}) {version of software resources} {python-2.7})
+(x-is-the-y-of-z (new-string {"3.0"}) {version of software resources} {python-3.0})
 
 ;;; 
 ;;; RELATIONS
@@ -140,40 +122,22 @@
 (new-relation {is authorized to execute} :a-type-of {user} :b-type-of {software resources} :transitive T)
 (new-relation {depends on} :a-type-of {software resources} :b-type-of {software resources} :transitive T)
 
-;;; Create {performs} Relations
-(new-statement {user 1} {is performing} {Apache server configure})
-(new-statement {user 1} {is performing} {Shopping cart development})
-(new-statement {user 2} {is performing} {CNN for product recommendation})
-
-;;; Create instances of {software resources} then Create {requires} Relations
-(new-statement {CNN for product recommendation} {requires} (new-indv NIL {Expresso}))
-(new-statement {Shopping cart development} {requires} (new-indv NIL {tornado}))
-(new-statement {Shopping cart development} {requires} (new-indv NIL {Laravel}))
-(new-statement {Shopping cart development} {requires} (new-indv NIL {Node.js}))
-(new-statement {Apache server configure} {requires} (new-indv NIL {Apache}))
-
-;;; Create {is authorized to execute} Relations
-(new-statement {user} {is authorized to execute} {python})
-(new-statement {data scientist} {is authorized to execute} {Expresso})
-(new-statement {backend developer} {is authorized to execute} {tornado})
-(new-statement {backend developer} {is authorized to execute} {Apache})
-
 ;;; Create {depends on} Relations
 (new-statement {BLAS} {depends on} {Fortran})
 (new-statement {Boost} {depends on} {C++})
-(new-statement {Caffe} {depends on} {OpenCV 2.4})
+(new-statement {Caffe} {depends on} {OpenCV-2.4})
 (new-statement {Caffe} {depends on} {hdf5})
 (new-statement {Caffe} {depends on} {gflags})
-(new-statement {Caffe} {depends on} {CUDA 6.0})
-(new-statement {Caffe} {depends on} {CUDA 7.0})
+(new-statement {Caffe} {depends on} {CUDA-6.0})
+(new-statement {Caffe} {depends on} {CUDA-7.0})
 (new-statement {Caffe} {depends on} {BLAS})
-(new-statement {Caffe} {depends on} {Boost 1.55})
+(new-statement {Caffe} {depends on} {Boost-1.55})
 (new-statement {Caffe} {depends on} {protobuf})
 (new-statement {Caffe} {depends on} {leveldb})
 (new-statement {coreutils} {depends on} {gmp})
 (new-statement {cookie} {depends on} {debug})
 (new-statement {express} {depends on} {cookie})
-(new-statement {Expresso} {depends on} {python 3.0})
+(new-statement {Expresso} {depends on} {python-3.0})
 (new-statement {Expresso} {depends on} {protobuf})
 (new-statement {Expresso} {depends on} {Caffe})
 (new-statement {express-session} {depends on} {cookie})
@@ -192,21 +156,15 @@
 (new-statement {MySQL} {depends on} {libaio})
 (new-statement {MySQL} {depends on} {libnuma})
 (new-statement {MongoDB} {depends on} {snappy})
-(new-statement {Node.js} {depends on} {path})
-(new-statement {Node.js} {depends on} {express-session})
-(new-statement {Node.js} {depends on} {express})
 (new-statement {Node.js} {depends on} {V8})
 (new-statement {Node.js} {depends on} {libuv})
-(new-statement {Node.js} {depends on} {http-parser})
 (new-statement {Node.js} {depends on} {npm})
 (new-statement {Node.js} {depends on} {OpenSSL})
 (new-statement {npm} {depends on} {OpenSSL})
 (new-statement {OpenCV} {depends on} {leveldb})
 (new-statement {OpenCV} {depends on} {gflags})
 (new-statement {OpenCV} {depends on} {glog})
-;;; (new-statement {path} {depends on} {process})
 (new-statement {path} {depends on} {util})
-;;; (new-statement {process} {depends on} {debug})
 (new-statement {python} {depends on} {eigen})
 (new-statement {python} {depends on} {OpenSSL})
 (new-statement {PHP} {depends on} {ANSI C})
@@ -215,11 +173,10 @@
 (new-statement {PHP} {depends on} {GNU make})
 (new-statement {PHP} {depends on} {MySQL})
 (new-statement {protobuf} {depends on} {C++})
-(new-statement {tornado} {depends on} {python 2.7})
+(new-statement {tornado} {depends on} {python-2.7})
 (new-statement {tornado} {depends on} {PHP})
 (new-statement {util} {depends on} {debug})
 (new-statement {V8} {depends on} {C++})
-
 (new-statement {TensorFlow} {depends on} {Cuda})
 (new-statement {TensorFlow} {depends on} {OpenMPI})
 (new-statement {TensorFlow} {depends on} {Protobuf})
@@ -264,8 +221,8 @@
   (loop for x in taskList do (print x))
 )  
 
-;;; Vulnerability check without verison. Softwares that are impacted by the
-;;; certain software will be printed.
+;;; Vulnerability check without verison. Softwares that are directly required by tasks
+;;; that are impacted by this vulnerability will be printed.
 ;;; Example: (software_check_vulnerability {OpenSSL})
 
 (defun software_check_vulnerability (software)
