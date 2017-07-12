@@ -5,7 +5,8 @@ import Pyro4
 from threading import RLock
 from subprocess import Popen, PIPE
 
-ERROR_MESSAGE = "\nERROR"   # we disable debug mode and hook it to a special sting
+ERROR_MESSAGE = "\nERROR"  # we disable debug mode and hook it to a special sting
+
 
 @Pyro4.expose
 class Scone(object):
@@ -22,28 +23,37 @@ class Scone(object):
         fcntl(self.sbcl_process.stdout, F_SETFL, flags | O_NONBLOCK)
         # skip all the output at the ver beginning
         print("**********SBCL init begins**********")
-        self.raw_write_input("(defun debug-ignore (c h) (declare (ignore h))(declare (ignore c)) (print (format t \"~CERROR\" #\\linefeed)) (abort))")
+        # we define raw_write_input and write_input because, write_input is used to enter query, but raw_write_input is
+        # used to enter command lines to sbcl without adding any addition string
+        # this is debug ignore function, when the query went wrong, sbcl will return error message instead of entering
+        # debug mode
+        self.raw_write_input(
+            "(defun debug-ignore (c h) (declare (ignore h))(declare (ignore c)) (print (format t \"~CERROR\" #\\linefeed)) (abort))")
         self.raw_write_input("(setf *debugger-hook* #'debug-ignore)")
         print("**********SBCL init ends**********")
 
+        # begin loading knowledgebase
         print("**********Scone init begins**********")
         self.raw_write_input('(load "scone/scone-loader.lisp")')
         self.raw_write_input('(scone "")')
         self.raw_write_input('(load-kb "core")')
-        # TODO Need to find a better way to determine whether we reach the end
         sleep(3)
+        # flush out the stdout pipe
         lines = self.read_output()
         for line in lines:
             print(line)
         print("**********Scone init ends**********")
+        # set stdout back to blocking
         fcntl(self.sbcl_process.stdout, F_SETFL, flags)
 
     def raw_write_input(self, raw_input):
+        # add one more "\n" to indicate current command line has ended
         self.sbcl_process.stdin.write(raw_input + "\n")
 
     def write_input(self, my_input):
-        # send command to sbcl
         # the reason for adding one more '\n' is that cmd need to determine whether a cmd has ended
+        # scone-call is a lisp-defined funtion that will print one more [PROMPT] that indicates current query has
+        # returned all the result
         self.sbcl_process.stdin.write("(scone-call %s)\n" % my_input)
 
     def read_output(self):
@@ -126,19 +136,26 @@ class Scone(object):
         else:
             return 0
 
-    # def task_performed_by(self, task_name, user_name):
+    def task_performed_by(self, task_name, user_name):
+        #  access_check (user task)
+        scone_input = '(access_check ({%s} {%s}))' % (task_name, user_name)
+        res = self.communicate(scone_input)
+        if res is None:
+            return -1
+        return res
 
+    # User is authorized to exec, grant_auth()
     def user_group_is_authorized_to_exec(self, user_group, softwares):
         for software in softwares:
             scone_input = "(new-statement {%s} {is authorized to execute} {%s})" % user_group, software
-            if self.communicate(scone_input) is None:   # TODO: rollback all authorization of not?
+            if self.communicate(scone_input) is None:  # TODO: rollback all authorization of not?
                 return -1
         return 0
 
     def assign_user_to_groups(self, user_name, group_names):  # only add group for now
         for group_name in group_names:
             scone_input = "(new-indv {%s} {%s})" % user_name, group_name
-            if self.communicate(scone_input) is None:   # TODO: rollback all assignment of not?
+            if self.communicate(scone_input) is None:  # TODO: rollback all assignment of not?
                 return -1
         return 0
 
@@ -165,9 +182,49 @@ class Scone(object):
     def check_user_can_use_software(self, user_name, software_name, version):
         scone_input = "(statement-true? {%s} {is authorized to execute} {%s})" % user_name, software_name + version
         res = self.communicate(scone_input)
+        # check user name, soft, version
         if res is None or res == "NIL":
             return False
         return True
+
+    def check_vulnerability(self, target, software_name, version=None, compare=None):
+        if target != 'user' and target != 'task' and target != 'software':
+            return -1
+        if version is None:
+            scone_input = "(type-node? {%s})" % software_name
+            res = self.communicate(scone_input)
+            if res != 'T':
+                return -1
+            # (user_check_vulnerability {OpenSSL})
+            scone_input = '(user_check_vulnerability {%s})' % software_name
+            return scone_input
+        else:
+            if compare is None:
+                return -1
+            elif compare != 'equal' and compare != 'newer' and compare != 'older':
+                return -1
+            else:
+                # (user_check_vulnerability_newer {python} "2.7")
+                scone_input = "(type-node? {%s})" % software_name + "_" + version
+                res = self.communicate(scone_input)
+                if res != 'T':
+                    return -1
+                scone_input = '(%s_check_vulnerability_%s {%s} "%s")' % target, compare, software_name, version
+                res = self.communicate(scone_input)
+                return list(set(res))
+
+    def check_access(self, user_name, task):
+        scone_input = "(type-node? {%s})" % user_name
+        res = self.communicate(scone_input)
+        if res == 'NIL':
+            return -1
+        scone_input = "(indv-node? {%s})" % task
+        res = self.communicate(scone_input)
+        if res != 'T':
+            return -1
+        scone_input = '(access_check {%s} {%s})' % user_name, task
+        res = self.communicate(scone_input)
+        return list(set(res))
 
     def run(self):
         daemon = Pyro4.Daemon()
