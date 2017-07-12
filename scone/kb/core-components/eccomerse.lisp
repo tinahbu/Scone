@@ -25,6 +25,8 @@
 (new-indv-role {email of user} {user} {string})
 (new-type-role {member of user} {user} {user})
 
+;;; Add Default User Group to {user} with the least privilege
+(new-type {default user} {user})
 ;;;
 ;;; SOFTWARE RESOURCES
 ;;;
@@ -87,7 +89,6 @@
 (new-type {snappy} {software resources})
 (new-type {util} {software resources})
 (new-type {V8} {software resources})
-
 (new-type {TensorFlow} {software resources})
 (new-type {OpenMPI} {software resources})
 (new-type {LLVM} {software resources})
@@ -96,7 +97,6 @@
 (new-type {JDK} {software resources})
 (new-type {Maven} {software resources})
 (new-type {C Std library} {software resources})
-
 (new-type {httplib} {software resources})
 (new-type {urllib} {software resources})
 (new-type {urllib2} {software resources})
@@ -197,16 +197,17 @@
 ;;; Example: (user_check_vulnerability {OpenSSL})
 (defun user_check_vulnerability (software);;; version exactly equal
   (setq userList '())
-  (with-markers (m1 m2)
+  (with-markers (m1 m2 m3)
     (progn
       (mark-rel-inverse {depends on} software m1) 
+      (do-marked (x m1)
+        (setq y (type-node? x))
+        (if (string= y "NIL") () (unmark x m1)))
       (do-marked (x m1)
         (mark-rel-inverse {requires} x m2)
         (do-marked (y m2) 
           (setq userList (nconc userList (list-rel-inverse {is performing} y)))))))
-  (loop for x in userList do (print x))
-)
-
+  (loop for x in userList do (print x)))
 
 ;;; Vulnerability check without verison. Tasks that are impacted by the
 ;;; certain software will be printed.
@@ -218,8 +219,7 @@
       (mark-rel-inverse {depends on} software m1) 
       (do-marked (x m1)
         (setq taskList (nconc taskList (list-rel-inverse {requires} x))))))
-  (loop for x in taskList do (print x))
-)  
+  (loop for x in taskList do (print x)))  
 
 ;;; Vulnerability check without verison. Softwares that are directly required by tasks
 ;;; that are impacted by this vulnerability will be printed.
@@ -228,8 +228,7 @@
 (defun software_check_vulnerability (software)
   (setq softwareList '())
   (setq softwareList (nconc softwareList (list-rel-inverse {depends on} software)))
-  (loop for x in softwareList do (print x))  
-)
+  (loop for x in softwareList do (print x)))
 
 ;;; Vulnerability check WITH verison. 
 ;;; Given a certain version, users that are impacted by the OLDER version (not included)
@@ -257,8 +256,7 @@
               (do-marked (z m3) 
                 ;;; Query for all the {user} that {is performing} the potentially impacted {tasks}
                 (setq userList (nconc userList (list-rel-inverse {is performing} z))))))))))
-  (loop for x in userList do (print x))  
-)
+  (loop for x in userList do (print x)))
 
 ;;; Vulnerability check WITH verison. 
 ;;; Given a certain version, tasks that are impacted by the OLDER version (not included)

@@ -5,7 +5,9 @@
 ;;; that the server hostname matches a domain name in the subject's (b) Common Name or (c) subjectAltName 
 ;;; field of the X.509 certificate, which allows man-in-the-middle attackers to spoof SSL servers via 
 ;;; an arbitrary valid certificate.	
-Publish Date : 2014-12-12	Last Update Date : 2017-06-30
+;;; Publish Date : 2014-12-12	Last Update Date : 2017-06-30
+
+
 ;;; Create New User Groups
 (new-type {frontend developer} {user})
 (new-type {backend developer} {user})
@@ -14,10 +16,8 @@ Publish Date : 2014-12-12	Last Update Date : 2017-06-30
 ;;; Create New Individual Users
 (new-indv {user 1} {user})
 (x-is-a-y-of-z {user 1} {member of user} {frontend developer})
-
 (new-indv {user 2} {user})
 (x-is-a-y-of-z {user 2} {member of user} {backend developer})
-
 (new-indv {user 3} {user})
 (x-is-a-y-of-z {user 3} {member of user} {data scientist})
 
