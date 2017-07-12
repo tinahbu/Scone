@@ -141,9 +141,16 @@
 (load-kb "core-components/geopolitics")
 
 ;;;; ----------------------------------------------------------------------
-;;;; BASIC OS KB
+;;;; BASIC ECCOMERSE KB
 
 ;;; General knowledge of a eccomerse model that designed by MITS-Scone team
 
 (load-kb "core-components/eccomerse")
+
+;;;; ----------------------------------------------------------------------
+;;;; BASIC TEST KB
+
+;;; General knowledge of a eccomerse model that designed by MITS-Scone team
+
+(load-kb "core-components/test")
 
