@@ -22,7 +22,8 @@ class StateModifier(object):
                     print("%s => %s" % (key, val))
 
             # do with scone
-            SCONE.create_software("Left4Dead")
-            SCONE.create_software("WoW")
+            print SCONE.create_software("Left4Dead", ["1", "1.5"])
+            print SCONE.create_software("WoW", ["1", "1.5"])
+            print SCONE.add_software_dependencies("Left4Dead_1", ["WoW_1", "WoW_10"])
             break
 

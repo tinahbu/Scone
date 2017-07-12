@@ -81,24 +81,54 @@ class Scone(object):
         print 456
         self.lock.release()
 
-    def create_software(self, new_software_name):
-        scone_input = "(new-type {%s} {software resources})" % new_software_name
+    """
+    Create new_software_name with provided versions in version_list
+        Create new_software_name if not exist
+        Create new_software_name_version
+        Return list of  new_software_name_version
+    """
+    def create_software(self, new_software_name, version_list=[]):
+        rv = []
+        scone_input = "(type-node? {%s})" % new_software_name
         res = self.communicate(scone_input)
         if res is None:
             return -1
-        for line in res:
-            print(line)
-        return 0
+        if res[0] == "NIL":
+            scone_input = "(new-type {%s} {software resources})" % new_software_name
+            res = self.communicate(scone_input)
+            if res is None or res[0] != "{%s}" % new_software_name:
+                return -1
+        for version in version_list:
+            scone_input = "(new-type {%s_%s} {%s})" % (new_software_name, version, new_software_name)
+            res = self.communicate(scone_input)
+            if res is None or res[0] != "{%s_%s}" % (new_software_name, version):
+                return -1
+            rv += [res[0].strip('{}')]
+        return rv
 
-    def add_software_dependencies(self, software_name, dependencies):
-        res = []
+
+    """
+    Add an existing software's dependencies, if this software_name does not exist, return -1
+    Return list of softwares in dependencies that does not exist in KB
+    """
+    def add_software_dependencies(self, software_name, dependencies=[]):
+        rv = []
+        scone_input = "(type-node? {%s})" % software_name
+        res = self.communicate(scone_input)
+        if res is None or res[0] == "NIL":
+            return -1
         for dep_item in dependencies:
-            # (new-statement {BLAS} {depends on} {Fortran})
-            scone_input = "(new-statement {%s} {depends on} {%s})" % (software_name, dep_item)
+            scone_input = "(type-node? {%s})" % dep_item
             res = self.communicate(scone_input)
             if res is None:
-                res.append(dep_item)
-        return res
+                return -1
+            if res[0] == "NIL":
+                rv.append(dep_item)
+            else:
+                # (new-statement {BLAS} {depends on} {Fortran})
+                scone_input = "(new-statement {%s} {depends on} {%s})" % (software_name, dep_item)
+                res = self.communicate(scone_input)
+        return rv
 
     def add_software_version(self, software_name, new_version):
         # (x-is-the-y-of-z (new-string {"1.55"}) {version of software resources} {Boost 1.55})
@@ -175,3 +205,6 @@ class Scone(object):
         uri = daemon.register(self)
         ns.register('scone', uri)
         daemon.requestLoop()
+
+    def test(self):
+        print self.communicate("")
