@@ -5,7 +5,7 @@ import Pyro4
 from threading import RLock
 from subprocess import Popen, PIPE
 
-ERROR_MESSAGE = "\nERROR"  # we disable debug mode and hook it to a special sting
+ERROR_MESSAGE = '\nERROR'  # we disable debug mode and hook it to a special sting
 
 
 @Pyro4.expose
@@ -65,6 +65,10 @@ class Scone(object):
                 break
             if line.startswith('"FINISH"'):
                 break
+            # When we trigger debugger, there will be no "FINISH" end, so we need to handle it seperately
+            if line.startswith('ERROR'):
+                lines.append(ERROR_MESSAGE)
+                break
             if not line.startswith('*') and not line.startswith('\n'):
                 lines.append(line.strip())
         return lines
@@ -120,21 +124,40 @@ class Scone(object):
         else:
             return 0
 
-    def create_task(self, new_task_name):
-        scone_input = "(new-type {%s} {task})" % new_task_name
+    """
+    Create a individual task from task type
+    return -1 if task already exists
+            0 if task created successfully
+    """
+    def user_create_task(self, new_task_name):
+        # (new-indv {user 1} {user})
+        scone_input = "(new-indv {%s} {task})" % new_task_name
         res = self.communicate(scone_input)
         if res is None:
             return -1
         else:
             return 0
 
-    def task_requires_software(self, task_name, software_name):
-        scone_intput = '(new-statement {%s} {requires} (new-indv NIL {%s}))' % (task_name, software_name)
-        res = self.communicate(scone_intput)
-        if res is None:
+    """
+    Assign softwares to specific task
+    return a list of softwares that does not exist now
+           -1 if task does not exist
+    """
+    def user_task_requires_software(self, task_name, software_list):
+        scone_input = "(indv-node? {%s})" % task_name
+        res = self.communicate(scone_input)
+        if res != 'T':
             return -1
-        else:
-            return 0
+        nonexisted_software_list = []
+        for software in software_list:
+            scone_input = "(type-node? {%s})" % software
+            res = self.communicate(scone_input)
+            if res != 'T':
+                nonexisted_software_list.append(software)
+            else:
+                scone_input = '(new-statement {%s} {requires} {%s} )' % task_name, software
+                self.communicate(scone_input)
+        return nonexisted_software_list
 
     def task_performed_by(self, task_name, user_name):
         #  access_check (user task)
@@ -216,7 +239,7 @@ class Scone(object):
     def check_access(self, user_name, task):
         scone_input = "(type-node? {%s})" % user_name
         res = self.communicate(scone_input)
-        if res == 'NIL':
+        if res != 'T':
             return -1
         scone_input = "(indv-node? {%s})" % task
         res = self.communicate(scone_input)
