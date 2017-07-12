@@ -195,12 +195,22 @@ class Scone(object):
     
     """
     def task_performed_by(self, task_name, user_name):
+        scone_input = "(indv-node? {%s})" % task_name
+        res = self.communicate(scone_input)
+        if res[0] != 'T':
+            return -1
+
+        scone_input = "(type-node? {%s})" % user_name
+        res = self.communicate(scone_input)
+        if res[0] != 'T':
+            return -1
+
         #  access_check (user task)
         scone_input = '(access_check ({%s} {%s}))' % (task_name, user_name)
         res = self.communicate(scone_input)
         if res is None:
             return -1
-        return res
+        return list(set(res))
 
     # User is authorized to exec, grant_auth()
     def user_group_is_authorized_to_exec(self, user_group, softwares):
