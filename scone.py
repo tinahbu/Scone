@@ -163,7 +163,7 @@ class Scone(object):
         else:
             rv = 0
 
-        scone_input = ('(x-is-the-y-of-z (new-string {%s}) {version of software resources} {%s_%s})'
+        scone_input = ('(x-is-the-y-of-z (new-string {\"%s\"}) {version of software resources} {%s_%s})'
                        % (new_version, software_name, new_version))
         res = self.communicate(scone_input)
         if res is None:
