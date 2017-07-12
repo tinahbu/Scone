@@ -65,9 +65,11 @@ class Scone(object):
                 break
             if line.startswith('"FINISH"'):
                 break
+            # print line
             # When we trigger debugger, there will be no "FINISH" end, so we need to handle it seperately
             if line.startswith('ERROR'):
                 lines.append(ERROR_MESSAGE)
+                self.sbcl_process.stdout.readline()
                 break
             if not line.startswith('*') and not line.startswith('\n'):
                 lines.append(line.strip())
@@ -146,19 +148,22 @@ class Scone(object):
     def user_task_requires_software(self, task_name, software_list):
         scone_input = "(indv-node? {%s})" % task_name
         res = self.communicate(scone_input)
-        if res != 'T':
+        if res[0] != 'T':
             return -1
         nonexisted_software_list = []
         for software in software_list:
             scone_input = "(type-node? {%s})" % software
             res = self.communicate(scone_input)
-            if res != 'T':
+            if res[0] != 'T':
                 nonexisted_software_list.append(software)
             else:
                 scone_input = '(new-statement {%s} {requires} {%s} )' % task_name, software
                 self.communicate(scone_input)
         return nonexisted_software_list
 
+    """
+    
+    """
     def task_performed_by(self, task_name, user_name):
         #  access_check (user task)
         scone_input = '(access_check ({%s} {%s}))' % (task_name, user_name)
