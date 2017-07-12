@@ -22,6 +22,15 @@ class StateModifier(object):
                     print("%s => %s" % (key, val))
 
             # do with scone
+            print SCONE.create_software("ABC", ["1.4", "3.5"])
+            print SCONE.create_software("DEF", ["1.4", "3.5"])
+            print SCONE.add_software_dependencies("ABC_1.4", ["DEF_1.4", "DEF_3.5", "DEF_3.3"])
+            print SCONE.add_software_version("ABC", "2.4")
+            print SCONE.add_software_version("ABC", "2.4")
+            print SCONE.add_software_version("AYC", "2.4")
+
+
+
             ret = SCONE.user_create_task("Qiaoyu's task")
             print ret
             ret = SCONE.user_create_task("Shopping cart development")
