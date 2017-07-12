@@ -207,21 +207,23 @@ class Scone(object):
         return nonexisted_software_list
 
     """
-    
+    Set task's performer to a user
+    return the list of softwares that needs user first gain authorization of it
+           -1, if task or user does not exist
     """
-    def task_performed_by(self, task_name, user_name):
+    def user_task_performed_by(self, task_name, user_name):
         scone_input = "(indv-node? {%s})" % task_name
         res = self.communicate(scone_input)
         if res[0] != 'T':
             return -1
 
-        scone_input = "(type-node? {%s})" % user_name
+        scone_input = "(indv-node? {%s})" % user_name
         res = self.communicate(scone_input)
         if res[0] != 'T':
             return -1
 
         #  access_check (user task)
-        scone_input = '(access_check ({%s} {%s}))' % (task_name, user_name)
+        scone_input = '(access_check {%s} {%s})' % (user_name, task_name)
         res = self.communicate(scone_input)
         if res is None:
             return -1
