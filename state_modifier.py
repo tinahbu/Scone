@@ -39,8 +39,19 @@ class StateModifier(object):
             ret = SCONE.user_task_requires_software("Qiaoyu's task", ["123", "456"])
             print ret
 
-            ret = SCONE.task_performed_by("CNN for product recommendation", "user 1")
+            ret = SCONE.user_task_performed_by("CNN for product recommendation", "user 1")
             print ret
+
+            print SCONE.create_user_group("new group")
+            print SCONE.create_user_group("new group")
+
+
+            print SCONE.create_user("new usr", "123", "wef@125.com", "new group")
+            print SCONE.create_user("new usr", "123", "wef@125.com", "new group")
+            print SCONE.create_user("new u2sr", "123", "wef@125.com", "new ")
+            print SCONE.create_user("new u2sr", "123", "wef@125.com")
+
+
             print "end!"
             break
 
