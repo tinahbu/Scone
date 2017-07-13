@@ -229,7 +229,7 @@ class Scone(object):
         if res is None:
             return -1
         if len(res) == 1:
-            scone_input = "(new-statement {%s} {is performing} {%s})" % user_name, task_name
+            scone_input = "(new-statement {%s} {is performing} {%s})" % (user_name, task_name)
             self.communicate(scone_input)
         return 0
 
