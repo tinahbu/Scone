@@ -242,6 +242,11 @@ class Scone(object):
         return 0
 
     def assign_user_to_groups(self, user_name, group_names):  # only add group for now
+        # scone_input = "(indv-node? {%s})" % user_name
+        # res = self.communicate(scone_input)
+        # if res[0] != 'T':
+        #     return -1
+
         for group_name in group_names:
             scone_input = "(new-indv {%s} {%s})" % user_name, group_name
             if self.communicate(scone_input) is None:  # TODO: rollback all assignment of not?
