@@ -224,10 +224,14 @@ class Scone(object):
 
         #  access_check (user task)
         scone_input = '(access_check {%s} {%s})' % (user_name, task_name)
+        # Not debugged
         res = self.communicate(scone_input)
         if res is None:
             return -1
-        return list(set(res))
+        if len(res) == 1:
+            scone_input = "(new-statement {%s} {is performing} {%s})" % (user_name, task_name)
+            self.communicate(scone_input)
+        return 0
 
     # User is authorized to exec, grant_auth()
     def user_group_is_authorized_to_exec(self, user_group, softwares):
@@ -238,6 +242,11 @@ class Scone(object):
         return 0
 
     def assign_user_to_groups(self, user_name, group_names):  # only add group for now
+        # scone_input = "(indv-node? {%s})" % user_name
+        # res = self.communicate(scone_input)
+        # if res[0] != 'T':
+        #     return -1
+
         for group_name in group_names:
             scone_input = "(new-indv {%s} {%s})" % user_name, group_name
             if self.communicate(scone_input) is None:  # TODO: rollback all assignment of not?

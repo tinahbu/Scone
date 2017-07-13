@@ -42,6 +42,9 @@ class StateModifier(object):
             ret = SCONE.user_task_performed_by("CNN for product recommendation", "user 1")
             print ret
 
+            ret = SCONE.user_task_performed_by("CNN for product recommendation", "user 3")
+            print ret
+
             print SCONE.create_user_group("new group")
             print SCONE.create_user_group("new group")
 
