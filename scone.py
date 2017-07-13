@@ -224,10 +224,14 @@ class Scone(object):
 
         #  access_check (user task)
         scone_input = '(access_check {%s} {%s})' % (user_name, task_name)
+        # Not debugged
         res = self.communicate(scone_input)
         if res is None:
             return -1
-        return list(set(res))
+        if len(res) == 1:
+            scone_input = "(new-statement {%s} {is performing} {%s})" % user_name, task_name
+            self.communicate(scone_input)
+        return 0
 
     # User is authorized to exec, grant_auth()
     def user_group_is_authorized_to_exec(self, user_group, softwares):
