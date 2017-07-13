@@ -218,6 +218,9 @@
     (progn
       (mark-rel-inverse {depends on} software m1) 
       (do-marked (x m1)
+        (setq y (type-node? x))
+        (if (string= y "NIL") () (unmark x m1)))
+      (do-marked (x m1)
         (setq taskList (nconc taskList (list-rel-inverse {requires} x))))))
   (loop for x in taskList do (print x)))  
 
@@ -475,6 +478,7 @@
 ;;; Given a user and a task, print a list of softwares that 
 ;;; the user is not yet authorized to execute.
 ;;; Example: (access_check {user 1} {CNN for product recommendation})
+;;; Example: (access_check {user 3} {CNN for product recommendation})
 ; (defun access_check (user task)
 ;   (setq softwareList '())
 ;   (setq tmp '())
@@ -503,10 +507,14 @@
 (defun access_check (user task)
   (setq softwareList '())
   (setq tmp '())
-  (with-markers (m1)
+  (with-markers (m1 m2)
     (progn
       (mark-rel {requires} task m1) ;;; {Expresso}
       (do-marked (x m1)
-        (setq y (statement-true? user {is authorized to execute} x))
-        (if (string= y "T") () (setq softwareList (nconc softwareList (list x)))))
+        (setq cond1 (statement-true? user {is authorized to execute} x))
+        (mark-role-inverse {member of user} user m2)
+        (do-marked (y m2)
+          (setq cond2 (statement-true? y {is authorized to execute} x))
+        )
+        (if (or (string= cond1 "T") (string= cond2 "T")) () (setq softwareList (nconc softwareList (list x)))))
   (loop for x in softwareList do (print x)))))
