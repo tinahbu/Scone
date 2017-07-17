@@ -237,10 +237,15 @@ class Scone(object):
             self.communicate(scone_input)
         return 0
 
+    """
+    Create a {is authorized to execute} relation between user/user group and list of softwares
+    return -1 if failed
+            0 if success
+    """
     # User is authorized to exec, grant_auth()
-    def user_group_is_authorized_to_exec(self, user_group, softwares):
+    def user_group_is_authorized_to_exec(self, user_group, softwares=[]):
         for software in softwares:
-            scone_input = "(new-statement {%s} {is authorized to execute} {%s})" % user_group, software
+            scone_input = "(new-statement {%s} {is authorized to execute} {%s})" % (user_group, software)
             if self.communicate(scone_input) is None:  # TODO: rollback all authorization of not?
                 return -1
         return 0
