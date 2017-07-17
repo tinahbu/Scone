@@ -541,6 +541,8 @@
 ;;; the user is not yet authorized to execute.
 ;;; Example: (access_check {user 1} {CNN for product recommendation})
 ;;; Example: (access_check {user 3} {CNN for product recommendation})
+
+
 ; (defun access_check (user task)
 ;   (setq softwareList '())
 ;   (setq tmp '())
