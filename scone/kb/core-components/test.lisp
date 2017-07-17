@@ -34,7 +34,7 @@
 
 ;;; Create instances of {software resources} then Create {requires} Relations
 (new-statement {CNN for product recommendation} {requires} (new-indv NIL {Expresso}))
-(new-statement {CNN for product recommendation} {requires} (new-indv NIL {Python-3.0}))
+(new-statement {CNN for product recommendation} {requires} (new-indv NIL {Python_3.0}))
 (new-statement {CNN for product recommendation} {requires} (new-indv NIL {httplib}))
 (new-statement {Shopping cart development} {requires} (new-indv NIL {tornado}))
 (new-statement {Shopping cart development} {requires} (new-indv NIL {Laravel}))

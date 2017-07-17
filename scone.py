@@ -307,7 +307,6 @@ class Scone(object):
     """
     Create a new user group, failed return -1
     """
-
     def create_user_group(self, new_group_name):
         scone_input = "(new-type {%s} {user})" % new_group_name
         res = self.communicate(scone_input)
@@ -315,13 +314,17 @@ class Scone(object):
             return -1
         return 0
 
-    def check_user_can_use_software(self, user_name, software_name, version):
-        scone_input = "(statement-true? {%s} {is authorized to execute} {%s})" % user_name, software_name + version
+    def check_user_can_use_software(self, user_name, software_name, version=""):
+        if len(version) == 0:
+            scone_input = "(statement-true? {%s} {is authorized to execute} {%s})" % (user_name, software_name)
+        else:
+            scone_input = "(statement-true? {%s} {is authorized to execute} {%s})" % (user_name, software_name + "_" + version)
         res = self.communicate(scone_input)
         # check user name, soft, version
-        if res is None or res == "NIL":
-            return False
-        return True
+        print res
+        if res is not None and res[0] != "NIL":
+            return True
+        # continue checking user's group's access
 
     def check_vulnerability(self, target, software_name, version=None, compare=None):
         if target != 'user' and target != 'task' and target != 'software':

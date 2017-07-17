@@ -57,6 +57,8 @@ class StateModifier(object):
 
             print SCONE.create_user("Qiaoyu Deng", "2012211616", "qdeng@andrew.cmu,edu")
             print SCONE.assign_user_to_groups("Qiaoyu Deng", ["backend developer"])
+            print SCONE.check_user_can_use_software("Qiaoyu Deng", "Expresso")
+            print SCONE.check_user_can_use_software("Qiaoyu Deng", "Apache")
             print "end!"
             break
 
