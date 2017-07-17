@@ -42,8 +42,8 @@ class StateModifier(object):
             # ret = SCONE.user_task_performed_by("CNN for product recommendation", "user 1")
             # print ret
             #
-            # ret = SCONE.user_task_performed_by("CNN for product recommendation", "user 3")
-            # print ret
+            ret = SCONE.user_task_performed_by("CNN for product recommendation", "user 3")
+            print ret
             #
             # print SCONE.create_user_group("new group")
             # print SCONE.create_user_group("new group")
@@ -57,6 +57,8 @@ class StateModifier(object):
 
             print SCONE.create_user("Qiaoyu Deng", "2012211616", "qdeng@andrew.cmu,edu")
             print SCONE.assign_user_to_groups("Qiaoyu Deng", ["backend developer"])
+
+            print SCONE.check_access("user 3", "CNN for product recommendation")
             print "end!"
             break
 
