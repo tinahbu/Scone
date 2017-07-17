@@ -241,17 +241,24 @@ class Scone(object):
                 return -1
         return 0
 
-    def assign_user_to_groups(self, user_name, group_names):  # only add group for now
-        # scone_input = "(indv-node? {%s})" % user_name
-        # res = self.communicate(scone_input)
-        # if res[0] != 'T':
-        #     return -1
-
+    def assign_user_to_groups(self, user_name, group_names):  # only add group for nowres = self.communicate(scone_input)
+        scone_input = "(indv-node? {%s})" % user_name
+        res = self.communicate(scone_input)
+        if res[0] != 'T':
+            return -1
+        print "line 251"
+        nonexisted_group_list = []
         for group_name in group_names:
-            scone_input = "(new-indv {%s} {%s})" % user_name, group_name
-            if self.communicate(scone_input) is None:  # TODO: rollback all assignment of not?
-                return -1
-        return 0
+            scone_input = "(type-node? {%s})" % group_name
+            res = self.communicate(scone_input)
+            if res[0] != 'T':
+                nonexisted_group_list.append(group_name)
+                continue
+            print "line 259"
+            scone_input = "(x-is-a-y-of-z {%s} {member of user} {%s})" % (user_name, group_name)
+            self.communicate(scone_input)
+
+        return nonexisted_group_list
 
     def create_user(self, user_name, user_id, user_email):
         scone_inputs = ["(new-type {%s} {default user})" % user_name,
