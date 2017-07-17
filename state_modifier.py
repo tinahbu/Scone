@@ -54,6 +54,7 @@ class StateModifier(object):
             print SCONE.create_user("new u2sr", "123", "wef@125.com", "new ")
             print SCONE.create_user("new u2sr", "123", "wef@125.com")
 
+            print SCONE.user_group_is_authorized_to_exec("new group", ["ABC"])
 
             print "end!"
             break
