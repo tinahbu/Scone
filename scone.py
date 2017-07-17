@@ -103,6 +103,7 @@ class Scone(object):
         Create new_software_name_version
         Return list of  new_software_name_version if success
     """
+
     def create_software(self, new_software_name, version_list=[]):
         rv = []
         scone_input = "(type-node? {%s})" % new_software_name
@@ -122,11 +123,11 @@ class Scone(object):
             rv += [res[0].strip('{}')]
         return rv
 
-
     """
     Add an existing software's dependencies, if this software_name does not exist, return -1
     Return list of softwares in dependencies that does not exist in KB
     """
+
     def add_software_dependencies(self, software_name, dependencies=[]):
         rv = []
         scone_input = "(type-node? {%s})" % software_name
@@ -146,11 +147,11 @@ class Scone(object):
                 res = self.communicate(scone_input)
         return rv
 
-
     """
     Add a new version to an existing software, if the software does not exist, return -1
     If success, return 0, if the new_version is already in KB, return 1
     """
+
     def add_software_version(self, software_name, new_version):
         # (x-is-the-y-of-z (new-string {"1.55"}) {version of software resources} {Boost 1.55})
         scone_input = "(type-node? {%s})" % software_name
@@ -176,6 +177,7 @@ class Scone(object):
     return -1 if task already exists
             0 if task created successfully
     """
+
     def user_create_task(self, new_task_name):
         # (new-indv {user 1} {user})
         scone_input = "(new-indv {%s} {task})" % new_task_name
@@ -190,6 +192,7 @@ class Scone(object):
     return a list of softwares that does not exist now
            -1 if task does not exist
     """
+
     def user_task_requires_software(self, task_name, software_list):
         scone_input = "(indv-node? {%s})" % task_name
         res = self.communicate(scone_input)
@@ -211,6 +214,7 @@ class Scone(object):
     return the list of softwares that needs user first gain authorization of it
            -1, if task or user does not exist
     """
+
     def user_task_performed_by(self, task_name, user_name):
         scone_input = "(indv-node? {%s})" % task_name
         res = self.communicate(scone_input)
@@ -222,7 +226,7 @@ class Scone(object):
         if res[0] != 'T':
             return -1
 
-        #  access_check (user task)
+        # access_check (user task)
         scone_input = '(access_check {%s} {%s})' % (user_name, task_name)
         # Not debugged
         res = self.communicate(scone_input)
@@ -241,12 +245,17 @@ class Scone(object):
                 return -1
         return 0
 
-    def assign_user_to_groups(self, user_name, group_names):  # only add group for nowres = self.communicate(scone_input)
+    '''
+    Assign a user to a list of groups
+    return 0, if assign successfully to all of groups
+           the list of groups that have not existed
+    '''
+    def assign_user_to_groups(self, user_name,
+                              group_names=[]):  # only add group for nowres = self.communicate(scone_input)
         scone_input = "(indv-node? {%s})" % user_name
         res = self.communicate(scone_input)
         if res[0] != 'T':
             return -1
-        print "line 251"
         nonexisted_group_list = []
         for group_name in group_names:
             scone_input = "(type-node? {%s})" % group_name
@@ -254,18 +263,17 @@ class Scone(object):
             if res[0] != 'T':
                 nonexisted_group_list.append(group_name)
                 continue
-            print "line 259"
             scone_input = "(x-is-a-y-of-z {%s} {member of user} {%s})" % (user_name, group_name)
             self.communicate(scone_input)
 
         return nonexisted_group_list
-
 
     """
     create new user, assign it to the user_group if provided (or to the default user),
     if the provided user_group does not exist, return -1
     if the user is already in the KB, return 1
     """
+
     def create_user(self, user_name, user_id, user_email, group_name="default user"):
         scone_input = "(indv-node? {%s})" % user_name
         res = self.communicate(scone_input)
@@ -294,6 +302,7 @@ class Scone(object):
     """
     Create a new user group, failed return -1
     """
+
     def create_user_group(self, new_group_name):
         scone_input = "(new-type {%s} {user})" % new_group_name
         res = self.communicate(scone_input)
