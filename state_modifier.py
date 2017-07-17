@@ -59,6 +59,7 @@ class StateModifier(object):
             print SCONE.assign_user_to_groups("Qiaoyu Deng", ["backend developer"])
 
             print SCONE.check_access("user 3", "CNN for product recommendation")
+            print SCONE.check_access("user 1", "CNN for product recommendation")
             print "end!"
             break
 

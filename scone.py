@@ -365,7 +365,7 @@ class Scone(object):
             return -1
         scone_input = '(access_check {%s} {%s})' % (user_name, task)
         res = self.communicate(scone_input)
-        return map(lambda x : ' '.join(re.split('\s|\{|\}', x)[1:-2]), res[:-1])
+        return list(set(map(lambda x : ' '.join(re.split('\s|\{|\}', x)[1:-2]), res[:-1])))
 
     def run(self):
         daemon = Pyro4.Daemon()
