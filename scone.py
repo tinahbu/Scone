@@ -260,11 +260,29 @@ class Scone(object):
 
         return nonexisted_group_list
 
-    def create_user(self, user_name, user_id, user_email):
-        scone_inputs = ["(new-type {%s} {default user})" % user_name,
+
+    """
+    create new user, assign it to the user_group if provided (or to the default user),
+    if the provided user_group does not exist, return -1
+    if the user is already in the KB, return 1
+    """
+    def create_user(self, user_name, user_id, user_email, group_name="default user"):
+        scone_input = "(indv-node? {%s})" % user_name
+        res = self.communicate(scone_input)
+        if res is None:
+            return -1
+        if res[0] != "NIL":
+            return 1
+
+        scone_input = "(type-node? {%s})" % group_name
+        res = self.communicate(scone_input)
+        if res is None or res[0] == "NIL":
+            return -1
+        scone_inputs = ["(new-indv {%s} {default user})" % user_name,
                         "(x-is-the-y-of-z (new-string {\"{%s}\"}) {username of user} {%s})" % (user_name, user_name),
                         "(x-is-the-y-of-z (new-string {\"{%s}\"}) {email of user} {%s})" % (user_email, user_name),
-                        "(x-is-the-y-of-z (new-string {\"{%s}\"}) {userid of user} {%s})" % (user_id, user_name)]
+                        "(x-is-the-y-of-z (new-string {\"{%s}\"}) {userid of user} {%s})" % (user_id, user_name),
+                        "(x-is-a-y-of-z {%s} {member of user} {%s})" % (user_name, group_name)]
         for i, scone_input in enumerate(scone_inputs):
             if self.communicate(scone_input) is None:
                 if i is 0:
@@ -273,6 +291,9 @@ class Scone(object):
                     self.communicate("(remove-element {%s})" % user_name)
         return 0
 
+    """
+    Create a new user group, failed return -1
+    """
     def create_user_group(self, new_group_name):
         scone_input = "(new-type {%s} {user})" % new_group_name
         res = self.communicate(scone_input)

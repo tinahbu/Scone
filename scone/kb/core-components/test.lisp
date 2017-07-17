@@ -56,7 +56,3 @@
 (new-statement {python} {depends on} {urllib})
 (new-statement {python} {depends on} {urllib2})
 (new-statement {python} {depends on} {xmlrpclib})
-
-
-(new-indv {Python-3.0 of CMU MITS} {Python-3.0})
-(new-statement {Python-3.0 of CMU MITS} {depends on} {httplib})

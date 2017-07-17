@@ -195,11 +195,13 @@
 ;;; Vulnerability check without verison. Users that are impacted by the
 ;;; certain software will be printed.
 ;;; Example: (user_check_vulnerability {OpenSSL})
+;;; Example: (user_check_vulnerability {Python})
 (defun user_check_vulnerability (software);;; version exactly equal
   (setq userList '())
   (with-markers (m1 m2 m3)
     (progn
-      (mark-rel-inverse {depends on} software m1) 
+      (mark-rel-inverse {depends on} software m1)
+      (mark-instances software m1)
       (do-marked (x m1)
         (setq y (type-node? x))
         (if (string= y "NIL") () (unmark x m1)))
@@ -212,11 +214,13 @@
 ;;; Vulnerability check without verison. Tasks that are impacted by the
 ;;; certain software will be printed.
 ;;; Example: (task_check_vulnerability {OpenSSL})
+;;;(task_check_vulnerability {OpenMPI})
 (defun task_check_vulnerability (software)
   (setq taskList '())
   (with-markers (m1 m2)
     (progn
-      (mark-rel-inverse {depends on} software m1) 
+      (mark-rel-inverse {depends on} software m1)
+      (mark-instances software m1)
       (do-marked (x m1)
         (setq y (type-node? x))
         (if (string= y "NIL") () (unmark x m1)))
@@ -230,7 +234,17 @@
 
 (defun software_check_vulnerability (software)
   (setq softwareList '())
-  (setq softwareList (nconc softwareList (list-rel-inverse {depends on} software)))
+  (with-markers (m1)
+    (progn
+      (mark-rel-inverse {depends on} software m1)
+      (mark-instances software m1)
+      (do-marked (x m1)
+        (setq y (type-node? x))
+        (if (string= y "NIL") (setq softwareList (nconc softwareList (list x))) ())
+      )
+    )
+  )
+  
   (loop for x in softwareList do (print x)))
 
 ;;; Vulnerability check WITH verison. 
@@ -241,7 +255,7 @@
   (setq userList '())
   (with-markers (m1 m2 m3)
     (progn
-      (mark-children software m1)
+      (mark-instances software m1)
       (do-marked (x m1)
         ;;; Get all the version number
         (setq softwareVersion 
@@ -253,9 +267,11 @@
           ;;; softwareVersion is smaller/older than given version 
           (progn
             (mark-rel-inverse {depends on} x m2)
+            (mark x m2)
             (do-marked (y m2)
               ;;; Query for all the {task} that {requires} the potentially impacted {software resource}
-              (mark-rel-inverse {requires} y m3)
+              (setq tmp2 (type-node? y))
+              (if (string= tmp2 "NIL")(mark-rel-inverse {requires} y m3)(clear-marker m3))
               (do-marked (z m3) 
                 ;;; Query for all the {user} that {is performing} the potentially impacted {tasks}
                 (setq userList (nconc userList (list-rel-inverse {is performing} z))))))))))
@@ -270,7 +286,7 @@
   (setq taskList '())
   (with-markers (m1 m2)
     (progn
-      (mark-children software m1)
+      (mark-instances software m1)
       (do-marked (x m1)
         ;;; Get all the version number
         (setq softwareVersion 
@@ -282,9 +298,13 @@
           ;;; softwareVersion is smaller/older than given version 
           (progn
             (mark-rel-inverse {depends on} x m2)
+            (mark x m2)
             (do-marked (y m2)
               ;;; Query for all the {task} that {requires} the potentially impacted {software resource}
-              (setq taskList (nconc taskList (list-rel-inverse {requires} y)))))))))
+              (setq tmp2 (type-node? y))
+              (if (string= tmp2 "T") () (setq taskList (nconc taskList (list-rel-inverse {requires} y))))
+            )
+            )))))
   (loop for x in taskList do (print x))  
 )
 
@@ -295,9 +315,9 @@
 
 (defun software_check_vulnerability_older (software version)
   (setq softwareList '())
-  (with-markers (m1)
+  (with-markers (m1 m2)
     (progn
-      (mark-children software m1)
+      (mark-instances software m1)
       (do-marked (x m1)
         ;;; Get all the version number
         (setq softwareVersion 
@@ -306,8 +326,19 @@
         (if (not tmp)
           ;;; softwareVersion is greater or equal/newer than given version
           ()
-          ;;; softwareVersion is smaller/older than given version 
-          (setq softwareList (nconc softwareList (list-rel-inverse {depends on} x)))))))
+          ;;; softwareVersion is smaller/older than given version
+          (progn
+            (mark-rel-inverse {depends on} x m2)
+            (do-marked (y m2)
+              (setq tmp2 (type-node? y))
+              (if(string= "T" tmp2)()(setq softwareList (nconc softwareList (list y))))
+            )
+            (setq softwareList (nconc softwareList (list x)))
+          )
+        )
+      )
+    )
+  )
   (loop for x in softwareList do (print x))  
 )
 
@@ -320,51 +351,56 @@
   (setq userList '())
   (with-markers (m1 m2 m3)
     (progn
-      (mark-children software m1)
+      (mark-instances software m1)
       (do-marked (x m1)
         ;;; Get all the version number
         (setq softwareVersion 
           (node-value (the-x-of-y {version of software resources} x)))
         (setq tmp (string> softwareVersion version))
         (if (not tmp)
-          ;;; softwareVersion is older or equal than given version
+          ;;; softwareVersion is older or equal to the given version
           ()
-          ;;; softwareVersion is newer than given version 
+          ;;; softwareVersion is newer than the given version 
           (progn
             (mark-rel-inverse {depends on} x m2)
+            (mark x m2)
             (do-marked (y m2)
               ;;; Query for all the {task} that {requires} the potentially impacted {software resource}
-              (mark-rel-inverse {requires} y m3)
+              (setq tmp2 (type-node? y))
+              (if (string= tmp2 "NIL")(mark-rel-inverse {requires} y m3)(clear-marker m3))
               (do-marked (z m3) 
                 ;;; Query for all the {user} that {is performing} the potentially impacted {tasks}
                 (setq userList (nconc userList (list-rel-inverse {is performing} z))))))))))
-  (loop for x in userList do (print x))  
-)
+  (loop for x in userList do (print x)))
+
 
 ;;; Vulnerability check WITH verison. 
 ;;; Given a certain version, tasks that are impacted by the NEWER version (not included)
 ;;; are printed.
-;;; Example: (task_check_vulnerability_newer {python} "3.0")
-
+;;; Example: (task_check_vulnerability_newer {python} "2.7")
 (defun task_check_vulnerability_newer (software version)
   (setq taskList '())
   (with-markers (m1 m2)
     (progn
-      (mark-children software m1)
+      (mark-instances software m1)
       (do-marked (x m1)
         ;;; Get all the version number
         (setq softwareVersion 
           (node-value (the-x-of-y {version of software resources} x)))
         (setq tmp (string> softwareVersion version))
         (if (not tmp)
-          ;;; softwareVersion is older or equal than given version
+          ;;; softwareVersion is older or equal to the given version
           ()
-          ;;; softwareVersion is newer than given version 
+          ;;; softwareVersion is newer than the given version
           (progn
             (mark-rel-inverse {depends on} x m2)
+            (mark x m2)
             (do-marked (y m2)
               ;;; Query for all the {task} that {requires} the potentially impacted {software resource}
-              (setq taskList (nconc taskList (list-rel-inverse {requires} y)))))))))
+              (setq tmp2 (type-node? y))
+              (if (string= tmp2 "T") () (setq taskList (nconc taskList (list-rel-inverse {requires} y))))
+            )
+            )))))
   (loop for x in taskList do (print x))  
 )
 
@@ -375,19 +411,30 @@
 
 (defun software_check_vulnerability_newer (software version)
   (setq softwareList '())
-  (with-markers (m1)
+  (with-markers (m1 m2)
     (progn
-      (mark-children software m1)
+      (mark-instances software m1)
       (do-marked (x m1)
         ;;; Get all the version number
         (setq softwareVersion 
           (node-value (the-x-of-y {version of software resources} x)))
         (setq tmp (string> softwareVersion version))
         (if (not tmp)
-          ;;; softwareVersion is older or equal than given version
+          ;;; softwareVersion is older or equal to the given version
           ()
-          ;;; softwareVersion is newer than given version 
-          (setq softwareList (nconc softwareList (list-rel-inverse {depends on} x)))))))
+          ;;; softwareVersion is newer than the given version
+          (progn
+            (mark-rel-inverse {depends on} x m2)
+            (do-marked (y m2)
+              (setq tmp2 (type-node? y))
+              (if(string= "T" tmp2)()(setq softwareList (nconc softwareList (list y))))
+            )
+            (setq softwareList (nconc softwareList (list x)))
+          )
+        )
+      )
+    )
+  )
   (loop for x in softwareList do (print x))  
 )
 
@@ -401,77 +448,92 @@
   (setq userList '())
   (with-markers (m1 m2 m3)
     (progn
-      (mark-children software m1)
+      (mark-instances software m1)
       (do-marked (x m1)
         ;;; Get all the version number
         (setq softwareVersion 
           (node-value (the-x-of-y {version of software resources} x)))
-        (if (string= softwareVersion version)
-          ;;; softwareVersion is equal to the given version
+        (setq tmp (string= softwareVersion version))
+        (if (not tmp)
+          ;;; softwareVersion is different from the given version
+          ()
+          ;;; softwareVersion is the same as the given version 
           (progn
             (mark-rel-inverse {depends on} x m2)
+            (mark x m2)
             (do-marked (y m2)
-            ;;; Query for all the {task} that {requires} the potentially impacted {software resource}
-              (mark-rel-inverse {requires} y m3)
+              ;;; Query for all the {task} that {requires} the potentially impacted {software resource}
+              (setq tmp2 (type-node? y))
+              (if (string= tmp2 "NIL")(mark-rel-inverse {requires} y m3)(clear-marker m3))
               (do-marked (z m3) 
                 ;;; Query for all the {user} that {is performing} the potentially impacted {tasks}
-                (setq userList (nconc userList (list-rel-inverse {is performing} z))))))
-          ;;; softwareVersion is not equal to the given version 
-          ()
-        ))))
-  (loop for x in userList do (print x))  
-)
+                (setq userList (nconc userList (list-rel-inverse {is performing} z))))))))))
+  (loop for x in userList do (print x)))
+
 
 ;;; Vulnerability check WITH verison. 
 ;;; Given a certain version, tasks that are impacted by the given version
 ;;; are printed.
 ;;; Example: (task_check_vulnerability_equal {python} "3.0")
 
-
 (defun task_check_vulnerability_equal (software version)
   (setq taskList '())
   (with-markers (m1 m2)
     (progn
-      (mark-children software m1)
+      (mark-instances software m1)
       (do-marked (x m1)
         ;;; Get all the version number
         (setq softwareVersion 
           (node-value (the-x-of-y {version of software resources} x)))
-        (if (string-equal softwareVersion version)
-          ;;; softwareVersion is equal to the given version
+        (setq tmp (string= softwareVersion version))
+        (if (not tmp)
+          ;;; softwareVersion is different from the given version
+          ()
+          ;;; softwareVersion is the same as the given version 
           (progn
             (mark-rel-inverse {depends on} x m2)
+            (mark x m2)
             (do-marked (y m2)
               ;;; Query for all the {task} that {requires} the potentially impacted {software resource}
-              (setq taskList (nconc taskList (list-rel-inverse {requires} y)))))
-          ;;; softwareVersion is not equal to the given version
-          ()
-        ))))
+              (setq tmp2 (type-node? y))
+              (if (string= tmp2 "T") () (setq taskList (nconc taskList (list-rel-inverse {requires} y))))
+            )
+            )))))
   (loop for x in taskList do (print x))  
 )
+
 
 ;;; Vulnerability check WITH verison. 
 ;;; Given a certain version, softwares that are impacted by the given version
 ;;; are printed.
 ;;; Example: (software_check_vulnerability_equal {python} "3.0")
 
-
 (defun software_check_vulnerability_equal (software version)
   (setq softwareList '())
-  (with-markers (m1)
+  (with-markers (m1 m2)
     (progn
-      (mark-children software m1)
+      (mark-instances software m1)
       (do-marked (x m1)
         ;;; Get all the version number
         (setq softwareVersion 
-          (node-value (the-x-of-y {version of software resources} x))
-        )
-        (if (string-equal softwareVersion version)
-          ;;; softwareVersion is older or equal than given version
-          (setq softwareList (nconc softwareList (list-rel-inverse {depends on} x)))
-          ;;; softwareVersion is newer than given version 
+          (node-value (the-x-of-y {version of software resources} x)))
+        (setq tmp (string= softwareVersion version))
+        (if (not tmp)
+           ;;; softwareVersion is different from the given version
           ()
-        ))))
+          ;;; softwareVersion is the same as the given version 
+          (progn
+            (mark-rel-inverse {depends on} x m2)
+            (do-marked (y m2)
+              (setq tmp2 (type-node? y))
+              (if(string= "T" tmp2)()(setq softwareList (nconc softwareList (list y))))
+            )
+            (setq softwareList (nconc softwareList (list x)))
+          )
+        )
+      )
+    )
+  )
   (loop for x in softwareList do (print x))  
 )
 
