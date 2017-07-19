@@ -61,7 +61,7 @@ class StateModifier(object):
             print SCONE.user_task_requires_software("Qiaoyu's task", ["Hadoop"])
             print SCONE.user_group_is_authorized_to_exec("backend developer", ["Hadoop"])
             print SCONE.user_task_performed_by("Qiaoyu's task", "Qiaoyu Deng")
-            print SCONE.check
+            print SCONE.check_vulnerability()
             print "end"
             break
 

@@ -336,25 +336,27 @@ class Scone(object):
         if version is None:
             scone_input = "(type-node? {%s})" % software_name
             res = self.communicate(scone_input)
-            if res != 'T':
+            if res[0] != 'T':
                 return -1
             # (user_check_vulnerability {OpenSSL})
-            scone_input = '(user_check_vulnerability {%s})' % software_name
-            return scone_input
+            scone_input = '(%s_check_vulnerability {%s})' % (target, software_name)
+            res = self.communicate(scone_input)
+            if target in ['user', 'task']:
+                return list(set(res[:-1]))
+            return list(set(map(lambda x: ' '.join(re.split('\s|\{|\}', x)[1:-2]), res[:-1])))
+        elif compare != 'equal' and compare != 'newer' and compare != 'older':
+            return -1
         else:
-            if compare is None:
+            # (user_check_vulnerability_newer {python} "2.7")
+            scone_input = "(type-node? {%s})" % (software_name + "_" + version)
+            res = self.communicate(scone_input)
+            if res[0] != 'T':
                 return -1
-            elif compare != 'equal' and compare != 'newer' and compare != 'older':
-                return -1
-            else:
-                # (user_check_vulnerability_newer {python} "2.7")
-                scone_input = "(type-node? {%s})" % software_name + "_" + version
-                res = self.communicate(scone_input)
-                if res != 'T':
-                    return -1
-                scone_input = '(%s_check_vulnerability_%s {%s} "%s")' % target, compare, software_name, version
-                res = self.communicate(scone_input)
-                return list(set(res))
+            scone_input = '(%s_check_vulnerability_%s {%s} "%s")' % (target, compare, software_name, version)
+            res = self.communicate(scone_input)
+            if target in ['user', 'task']:
+                return list(set(res[:-1]))
+            return list(set(map(lambda x: ' '.join(re.split('\s|\{|\}', x)[1:-2]), res[:-1])))
 
     """
     Given a user and a task, print a list of softwares that
