@@ -11,10 +11,11 @@
 ;;;
 ;;; *************************************************************
 
+
 ;;; 3 Main Components as type node
 (new-type {user} {person})
 (new-type {task} {action})
-(new-type {software resources} {thing})
+(new-type {resources} {thing})
 
 ;;;
 ;;; USER
@@ -27,6 +28,24 @@
 
 ;;; Add Default User Group to {user} with the least privilege
 (new-type {default user} {user})
+;;;
+;;; RESOURCES
+;;;
+;;; Detailed resources: software, hardware
+(new-type {software resources} {resources})
+(new-type {hardware resources} {resources})
+;;;
+;;; Different categories of hardware
+(new-type {graphics} {hardware resources})
+(new-type {memory} {hardware resources})
+(new-type {storage} {hardware resources})
+(new-type {processor} {hardware resources})
+(new-type {CPU} {processor})
+(new-type {Intel Core CPU} {CPU})
+(new-type {Intel Core CPU i3} {Intel Core CPU})
+(new-type {Intel Core CPU i5} {Intel Core CPU})
+(new-type {Intel Core CPU i7} {Intel Core CPU})
+(new-type {GPU} {processor})
 ;;;
 ;;; SOFTWARE RESOURCES
 ;;;
@@ -539,8 +558,8 @@
 
 ;;; Given a user and a task, print a list of softwares that 
 ;;; the user is not yet authorized to execute.
-;;; Example: (access_check {user 1} {CNN for product recommendation})
-;;; Example: (access_check {user 3} {CNN for product recommendation})
+;;; Example: (task_access_check {user 1} {CNN for product recommendation})
+;;; Example: (task_access_check {user 3} {CNN for product recommendation})
 
 
 ; (defun access_check (user task)
@@ -568,9 +587,10 @@
 ;   (loop for x in softwareList do (print x))
 ; )
 
-(defun access_check (user task)
+(defun task_access_check (user task)
   (setq softwareList '())
   (setq tmp '())
+  (setq cond2 "NIL")
   (with-markers (m1 m2)
     (progn
       (mark-rel {requires} task m1) ;;; {Expresso}
@@ -578,7 +598,28 @@
         (setq cond1 (statement-true? user {is authorized to execute} x))
         (mark-role-inverse {member of user} user m2)
         (do-marked (y m2)
-          (setq cond2 (statement-true? y {is authorized to execute} x))
+          (setq tmp (statement-true? y {is authorized to execute} x))
+          (if (string= tmp "T") (cond2 = "T") ())
         )
         (if (or (string= cond1 "T") (string= cond2 "T")) () (setq softwareList (nconc softwareList (list x)))))
   (loop for x in softwareList do (print x)))))
+
+;;; Given a user and a software, print a list of softwares that 
+;;; the user is not yet authorized to execute.
+;;; Example: (software_access_check {user 1} {Expresso})
+;;; Example: (access_check {user 3} {CNN for product recommendation})
+
+(authorized_to_use? {user 1} {Expresso})
+(defun authorized_to_use? (user software)
+  (setq softwareList '())
+  (setq tmp '())
+  (setq cond2 "NIL")
+  (setq cond1 (statement-true? user {is authorized to execute} software))
+  (with-markers (m1)
+    (mark-role-inverse {member of user} user m1)
+    (do-marked (x m1)
+      (setq tmp (statement-true? x {is authorized to execute} software))
+      (if (string= tmp "T") (cond2 = "T") ())))
+  (if (or (string= cond1 "T") (string= cond2 "T")) ("T") ("NIL")))
+
+
