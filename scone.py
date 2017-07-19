@@ -189,8 +189,8 @@ class Scone(object):
             return 0
 
     """
-    Assign softwares to specific task
-    return a list of softwares that does not exist now
+    Assign software to specific task
+    return a list of software that does not exist now
            -1 if task does not exist
     """
 
@@ -206,7 +206,7 @@ class Scone(object):
             if res[0] != 'T':
                 nonexisted_software_list.append(software)
             else:
-                scone_input = '(new-statement {%s} {requires} {%s} )' % task_name, software
+                scone_input = '(new-statement {%s} {requires} {%s} )' % (task_name, software)
                 self.communicate(scone_input)
         return nonexisted_software_list
 
@@ -315,6 +315,9 @@ class Scone(object):
             return -1
         return 0
 
+    '''
+    @TODO
+    '''
     def check_user_can_use_software(self, user_name, software_name, version=""):
         if len(version) == 0:
             scone_input = "(statement-true? {%s} {is authorized to execute} {%s})" % (user_name, software_name)
