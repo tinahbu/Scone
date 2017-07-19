@@ -25,15 +25,20 @@
 (new-indv-role {username of user} {user} {string})
 (new-indv-role {email of user} {user} {string})
 (new-type-role {member of user} {user} {user})
+(new-type-role {os of user} {user} {operating system})
+(new-type-role {processor of user} {user} {processor})
+(new-type-role {storage of user} {user} {storage})
 
 ;;; Add Default User Group to {user} with the least privilege
 (new-type {default user} {user})
+
 ;;;
 ;;; RESOURCES
 ;;;
 ;;; Detailed resources: software, hardware
 (new-type {software resources} {resources})
 (new-type {hardware resources} {resources})
+(new-type {operating system} {resources})
 ;;;
 ;;; Different categories of hardware
 (new-type {graphics} {hardware resources})
@@ -46,6 +51,8 @@
 (new-type {Intel Core CPU i5} {Intel Core CPU})
 (new-type {Intel Core CPU i7} {Intel Core CPU})
 (new-type {GPU} {processor})
+(new-type {lalala} {GPU})
+
 ;;;
 ;;; SOFTWARE RESOURCES
 ;;;
@@ -59,17 +66,17 @@
 (new-type {ANSI C} {software resources})
 (new-type {BLAS} {software resources})
 (new-type {Boost} {software resources})
-(new-type {Boost-1.55} {Boost})
+(new-type {Boost_1.55} {Boost})
 (new-type {Caffe} {software resources})
 (new-type {Composer} {software resources})
 (new-type {cookie} {software resources})
 (new-type {C} {software resources})
 (new-type {coreutils} {software resources})
 (new-type {CUDA} {software resources})
-(new-type {CUDA-5.0} {CUDA})
-(new-type {CUDA-5.5} {CUDA})
-(new-type {CUDA-6.0} {CUDA})
-(new-type {CUDA-7.0} {CUDA})
+(new-type {CUDA_5.0} {CUDA})
+(new-type {CUDA_5.5} {CUDA})
+(new-type {CUDA_6.0} {CUDA})
+(new-type {CUDA_7.0} {CUDA})
 (new-type {C++} {software resources})
 (new-type {debug} {software resources})
 (new-type {Expresso} {software resources})
@@ -94,16 +101,16 @@
 (new-type {Node.js} {software resources})
 (new-type {npm} {software resources})
 (new-type {OpenCV} {software resources})
-(new-type {OpenCV-2.4} {OpenCV})
-(new-type {OpenCV-3.0} {OpenCV})
+(new-type {OpenCV_2.4} {OpenCV})
+(new-type {OpenCV_3.0} {OpenCV})
 (new-type {OpenSSL} {software resources})
 (new-type {tornado} {software resources})
 (new-type {path} {software resources})
 ;;; (new-type {process} {software resources}) ;;;Error, process has already been used in Scone
 (new-type {protobuf} {software resources})
 (new-type {python} {software resources})
-(new-type {python-2.7} {python})
-(new-type {python-3.0} {python})
+(new-type {python_2.7} {python})
+(new-type {python_3.0} {python})
 (new-type {PHP} {software resources})
 (new-type {snappy} {software resources})
 (new-type {util} {software resources})
@@ -122,41 +129,41 @@
 (new-type {xmlrpclib} {software resources})
 
 ;;; Assign Version Value to Software's {version of software resources} role node
-(x-is-the-y-of-z (new-string {"1.55"}) {version of software resources} {Boost-1.55})
-(x-is-the-y-of-z (new-string {"5.0"}) {version of software resources} {CUDA-5.0})
-(x-is-the-y-of-z (new-string {"5.5"}) {version of software resources} {CUDA-5.5})
-(x-is-the-y-of-z (new-string {"6.0"}) {version of software resources} {CUDA-6.0})
-(x-is-the-y-of-z (new-string {"7.0"}) {version of software resources} {CUDA-7.0})
-(x-is-the-y-of-z (new-string {"2.4"}) {version of software resources} {OpenCV-2.4})
-(x-is-the-y-of-z (new-string {"3.0"}) {version of software resources} {OpenCV-3.0})
-(x-is-the-y-of-z (new-string {"2.7"}) {version of software resources} {python-2.7})
-(x-is-the-y-of-z (new-string {"3.0"}) {version of software resources} {python-3.0})
+(x-is-the-y-of-z (new-string {"1.55"}) {version of software resources} {Boost_1.55})
+(x-is-the-y-of-z (new-string {"5.0"}) {version of software resources} {CUDA_5.0})
+(x-is-the-y-of-z (new-string {"5.5"}) {version of software resources} {CUDA_5.5})
+(x-is-the-y-of-z (new-string {"6.0"}) {version of software resources} {CUDA_6.0})
+(x-is-the-y-of-z (new-string {"7.0"}) {version of software resources} {CUDA_7.0})
+(x-is-the-y-of-z (new-string {"2.4"}) {version of software resources} {OpenCV_2.4})
+(x-is-the-y-of-z (new-string {"3.0"}) {version of software resources} {OpenCV_3.0})
+(x-is-the-y-of-z (new-string {"2.7"}) {version of software resources} {python_2.7})
+(x-is-the-y-of-z (new-string {"3.0"}) {version of software resources} {python_3.0})
 
 ;;; 
 ;;; RELATIONS
 ;;; 
 ;;; Create 4 relations between main components
-(new-relation {is performing} :a-type-of {user} :b-type-of {task} :transitive T)
-(new-relation {requires} :a-type-of {task} :b-type-of {software resources} :transitive T)
-(new-relation {is authorized to execute} :a-type-of {user} :b-type-of {software resources} :transitive T)
+(new-relation {is performing} :a-type-of {user} :b-type-of {task})
+(new-relation {requires} :a-type-of {task} :b-type-of {software resources})
+(new-relation {is authorized to execute} :a-type-of {user} :b-type-of {software resources})
 (new-relation {depends on} :a-type-of {software resources} :b-type-of {software resources} :transitive T)
 
 ;;; Create {depends on} Relations
 (new-statement {BLAS} {depends on} {Fortran})
 (new-statement {Boost} {depends on} {C++})
-(new-statement {Caffe} {depends on} {OpenCV-2.4})
+(new-statement {Caffe} {depends on} {OpenCV_2.4})
 (new-statement {Caffe} {depends on} {hdf5})
 (new-statement {Caffe} {depends on} {gflags})
-(new-statement {Caffe} {depends on} {CUDA-6.0})
-(new-statement {Caffe} {depends on} {CUDA-7.0})
+(new-statement {Caffe} {depends on} {CUDA_6.0})
+(new-statement {Caffe} {depends on} {CUDA_7.0})
 (new-statement {Caffe} {depends on} {BLAS})
-(new-statement {Caffe} {depends on} {Boost-1.55})
+(new-statement {Caffe} {depends on} {Boost_1.55})
 (new-statement {Caffe} {depends on} {protobuf})
 (new-statement {Caffe} {depends on} {leveldb})
 (new-statement {coreutils} {depends on} {gmp})
 (new-statement {cookie} {depends on} {debug})
 (new-statement {express} {depends on} {cookie})
-(new-statement {Expresso} {depends on} {python-3.0})
+(new-statement {Expresso} {depends on} {python_3.0})
 (new-statement {Expresso} {depends on} {protobuf})
 (new-statement {Expresso} {depends on} {Caffe})
 (new-statement {express-session} {depends on} {cookie})
@@ -192,7 +199,7 @@
 (new-statement {PHP} {depends on} {GNU make})
 (new-statement {PHP} {depends on} {MySQL})
 (new-statement {protobuf} {depends on} {C++})
-(new-statement {tornado} {depends on} {python-2.7})
+(new-statement {tornado} {depends on} {python_2.7})
 (new-statement {tornado} {depends on} {PHP})
 (new-statement {util} {depends on} {debug})
 (new-statement {V8} {depends on} {C++})
@@ -621,5 +628,6 @@
       (setq tmp (statement-true? x {is authorized to execute} software))
       (if (string= tmp "T") (cond2 = "T") ())))
   (if (or (string= cond1 "T") (string= cond2 "T")) ("T") ("NIL")))
+
 
 
