@@ -4,6 +4,7 @@ from time import sleep
 import Pyro4
 from threading import RLock
 from subprocess import Popen, PIPE
+import re
 
 ERROR_MESSAGE = '\nERROR'  # we disable debug mode and hook it to a special sting
 
@@ -352,18 +353,22 @@ class Scone(object):
                 res = self.communicate(scone_input)
                 return list(set(res))
 
+    """
+    Given a user and a task, print a list of softwares that
+    the user is not yet authorized to execute.
+    """
     def check_access(self, user_name, task):
-        scone_input = "(type-node? {%s})" % user_name
+        scone_input = "(indv-node? {%s})" % user_name
         res = self.communicate(scone_input)
-        if res != 'T':
+        if res[0] != 'T':
             return -1
         scone_input = "(indv-node? {%s})" % task
         res = self.communicate(scone_input)
-        if res != 'T':
+        if res[0] != 'T':
             return -1
-        scone_input = '(access_check {%s} {%s})' % user_name, task
+        scone_input = '(access_check {%s} {%s})' % (user_name, task)
         res = self.communicate(scone_input)
-        return list(set(res))
+        return list(set(map(lambda x : ' '.join(re.split('\s|\{|\}', x)[1:-2]), res[:-1])))
 
     def run(self):
         daemon = Pyro4.Daemon()
