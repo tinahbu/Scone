@@ -60,6 +60,11 @@ class StateModifier(object):
 
             print SCONE.check_access("user 3", "CNN for product recommendation")
             print SCONE.check_access("user 1", "CNN for product recommendation")
+
+            print SCONE.check_vulnerability('user', 'python')
+            print SCONE.check_vulnerability('task', 'python')
+            print SCONE.check_vulnerability('software', 'python')
+            print SCONE.check_vulnerability('user', 'python', '3.0', 'equal')
             print "end!"
             break
 
