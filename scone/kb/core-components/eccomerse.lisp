@@ -611,7 +611,7 @@
 ;;; Example: (software_access_check {user 1} {Expresso})
 ;;; Example: (access_check {user 3} {CNN for product recommendation})
 
-(authorized_to_use? {user 1} {Expresso})
+;;; (authorized_to_use? {user 1} {Expresso})
 (defun authorized_to_use? (user software)
   (setq softwareList '())
   (setq tmp '())
