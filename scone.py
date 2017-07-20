@@ -325,10 +325,10 @@ class Scone(object):
             scone_input = "(statement-true? {%s} {is authorized to execute} {%s})" % (user_name, software_name + "_" + version)
         res = self.communicate(scone_input)
         # check user name, soft, version
-        print res
         if res is not None and res[0] != "NIL":
             return True
         # continue checking user's group's access
+
 
     def check_vulnerability(self, target, software_name, version=None, compare=None):
         if target != 'user' and target != 'task' and target != 'software':

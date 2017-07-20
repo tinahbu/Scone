@@ -19,9 +19,7 @@ class StateModifier(object):
             # print SCONE.add_software_version("ABC", "2.4")
             # print SCONE.add_software_version("ABC", "2.4")
             # print SCONE.add_software_version("AYC", "2.4")
-            #
-            #
-            #
+
             # ret = SCONE.user_create_task("Qiaoyu's task")
             # print ret
             # ret = SCONE.user_create_task("Shopping cart development")
@@ -61,7 +59,10 @@ class StateModifier(object):
             print SCONE.user_task_requires_software("Qiaoyu's task", ["Hadoop"])
             print SCONE.user_group_is_authorized_to_exec("backend developer", ["Hadoop"])
             print SCONE.user_task_performed_by("Qiaoyu's task", "Qiaoyu Deng")
-            print SCONE.check_vulnerability()
+            print SCONE.check_vulnerability('user', 'python')
+            print SCONE.check_vulnerability('task', 'python')
+            print SCONE.check_vulnerability('software', 'python')
+            print SCONE.check_vulnerability('user', 'python', '3.0', 'equal')
             print "end"
             break
 

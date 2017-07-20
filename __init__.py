@@ -225,19 +225,23 @@ def main():
             software_name = raw_input()
             print 'Please enter version of software'
             version = raw_input()
-            while True:
-                print 'compare type:'
-                print '1: ='
-                print '2: >'
-                print '3: <'
-                print '4: Back'
-                user_input = raw_input()
-                if user_input.isdigit() and (1 <= int(user_input) <= 4):
-                    break
-                print "invalid input! Please try again"
-            if user_input == '4':
-                continue
-            compare = ['equal', 'newer', 'older'][int(user_input) - 1]
+            if len(version) != 0:
+                while True:
+                    print 'compare type:'
+                    print '1: ='
+                    print '2: >'
+                    print '3: <'
+                    print '4: Back'
+                    user_input = raw_input()
+                    if user_input.isdigit() and (1 <= int(user_input) <= 4):
+                        break
+                    print "invalid input! Please try again"
+                if user_input == '4':
+                    continue
+                compare = ['equal', 'newer', 'older'][int(user_input) - 1]
+            else:
+                version = None
+                compare = None
             res = SCONE.check_vulnerability(target, software_name, version, compare)
             if res == -1:
                 print 'software not exists'
