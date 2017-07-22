@@ -18,6 +18,13 @@
 (x-is-a-y-of-z {user 2} {member of user} {backend developer})
 (new-indv {user 3} {user})
 (x-is-a-y-of-z {user 3} {member of user} {data scientist})
+(new-indv {user 6} {user})
+(x-is-a-y-of-z (new-indv NIL {Intel Core CPU_i5}) {processor of user} {user 6})
+(x-is-a-y-of-z (new-indv NIL {Intel Core CPU_i7}) {processor of user} {user 6})
+(x-is-a-y-of-z (new-indv NIL {AMD Radeon RX_580}) {processor of user} {user 6})
+
+
+
 
 ;;;
 ;;; TASK
@@ -26,6 +33,7 @@
 (new-indv {Shopping cart development} {task})
 (new-indv {CNN for product recommendation} {task})
 (new-indv {Apache server configure} {task})
+(new-indv {VR Game Development} {task})
 
 ;;; Create {performs} Relations
 (new-statement {user 1} {is performing} {Apache server configure})
@@ -33,14 +41,15 @@
 (new-statement {user 3} {is performing} {CNN for product recommendation})
 
 ;;; Create instances of {software resources} then Create {requires} Relations
-(new-statement {CNN for product recommendation} {requires} (new-indv NIL {Expresso}))
-(new-statement {CNN for product recommendation} {requires} (new-indv NIL {Python-3.0}))
-(new-statement {CNN for product recommendation} {requires} (new-indv NIL {httplib}))
-(new-statement {Shopping cart development} {requires} (new-indv NIL {tornado}))
-(new-statement {Shopping cart development} {requires} (new-indv NIL {Laravel}))
-(new-statement {Shopping cart development} {requires} (new-indv NIL {Node.js}))
-(new-statement {Apache server configure} {requires} (new-indv NIL {Apache}))
-
+(new-statement {CNN for product recommendation} {requires software} (new-indv NIL {Expresso}))
+(new-statement {CNN for product recommendation} {requires software} (new-indv NIL {Python-3.0}))
+(new-statement {CNN for product recommendation} {requires software} (new-indv NIL {httplib}))
+(new-statement {Shopping cart development} {requires software} (new-indv NIL {tornado}))
+(new-statement {Shopping cart development} {requires software} (new-indv NIL {Laravel}))
+(new-statement {Shopping cart development} {requires software} (new-indv NIL {Node.js}))
+(new-statement {Apache server configure} {requires software} (new-indv NIL {Apache}))
+(new-statement {VR Game Development} {requires processor} (new-indv NIL {Nvidia GeForce GTX_1060}))
+(new-statement {VR Game Development} {requires processor} (new-indv NIL {Intel Core CPU_i5}))
 ;;; Create {is authorized to execute} Relations
 (new-statement {user} {is authorized to execute} {python})
 (new-statement {data scientist} {is authorized to execute} {Expresso})
