@@ -582,3 +582,15 @@
         )
         (if (or (string= cond1 "T") (string= cond2 "T")) () (setq softwareList (nconc softwareList (list x)))))
   (loop for x in softwareList do (print x)))))
+
+
+(defun authorized_to_use? (user software)
+    (setq cond1 (statement-true? user {is authorized to execute} software))
+    (setq cond2 nil)
+    (with-markers (m1)
+      (progn
+        (mark-role-inverse {member of user} user m1)
+        (do-marked (x m1)
+            (setq tmp (statement-true? x {is authorized to execute} software))
+            (setq cond2 (if tmp t nil)))))
+    (if (or cond1 cond2) (print "t") (print "nil")))
