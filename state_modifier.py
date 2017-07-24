@@ -63,6 +63,7 @@ class StateModifier(object):
             print SCONE.check_vulnerability('task', 'python')
             print SCONE.check_vulnerability('software', 'python')
             print SCONE.check_vulnerability('user', 'python', '3.0', 'equal')
+            print SCONE.check_user_can_use_software("asdjfhalskdjhf", "Expresso")
             print "end"
             break
 

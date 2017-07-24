@@ -316,19 +316,37 @@ class Scone(object):
         return 0
 
     '''
-    @TODO
+    Check whether a user is authorized to execute that software maybe with specific version
+    return True when user is authorized
+           False when user is not authorized
+           -1 when user does not exist or software does not exist
     '''
     def check_user_can_use_software(self, user_name, software_name, version=""):
-        if len(version) == 0:
-            scone_input = "(statement-true? {%s} {is authorized to execute} {%s})" % (user_name, software_name)
-        else:
-            scone_input = "(statement-true? {%s} {is authorized to execute} {%s})" % (user_name, software_name + "_" + version)
+        # (authorized_to_use? {user 2} {Apache})
+        # Check whether user exists
+        scone_input = "(indv-node? {%s})" % user_name
         res = self.communicate(scone_input)
-        # check user name, soft, version
-        if res is not None and res[0] != "NIL":
-            return True
-        # continue checking user's group's access
+        if res[0] != 'T':
+            return -1
+        # Check whether specific version of a software exists
+        if len(version) == 0:
+            scone_input = "(type-node? {%s})" % software_name
+        else:
+            scone_input = "(type-node? {%s})" % (software_name + "_" + version)
+        res = self.communicate(scone_input)
+        if res is None or res[0] == "NIL":
+            return -1
 
+        if len(version) == 0:
+            scone_input = '(authorized_to_use? {%s} {%s})' % (user_name, software_name)
+        else:
+            scone_input = '(authorized_to_use? {%s} {%s})' % (user_name, software_name + "_" + version)
+        res = self.communicate(scone_input)
+        print res
+        if res[0] == 'NIL':
+            return False
+        else:
+            return True
 
     def check_vulnerability(self, target, software_name, version=None, compare=None):
         if target != 'user' and target != 'task' and target != 'software':
