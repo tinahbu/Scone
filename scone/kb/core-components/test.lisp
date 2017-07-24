@@ -11,23 +11,27 @@
 (new-type {backend developer} {user})
 (new-type {data scientist} {user})
 
+;;; 
+;;; USER Individuals
+;;;
 ;;; Create New Individual Users
 (new-indv {user 1} {user})
 (x-is-a-y-of-z {user 1} {member of user} {frontend developer})
 (new-indv {user 2} {user})
 (x-is-a-y-of-z {user 2} {member of user} {backend developer})
+;;; Test User for Operating System Version Category & Check
 (new-indv {user 3} {user})
 (x-is-a-y-of-z {user 3} {member of user} {data scientist})
+(x-is-the-y-of-z (new-indv NIL {MacOS 10.6}) {os of user} {user 3})
+
+;;; Test User for CPU, GPU brand & version check
 (new-indv {user 6} {user})
 (x-is-a-y-of-z (new-indv NIL {Intel Core CPU_i5}) {processor of user} {user 6})
 (x-is-a-y-of-z (new-indv NIL {Intel Core CPU_i7}) {processor of user} {user 6})
 (x-is-a-y-of-z (new-indv NIL {AMD Radeon RX_580}) {processor of user} {user 6})
 
-
-
-
 ;;;
-;;; TASK
+;;; TASK Individuals
 ;;;
 ;;; Create New Individual Tasks
 (new-indv {Shopping cart development} {task})
@@ -39,6 +43,7 @@
 (new-statement {user 1} {is performing} {Apache server configure})
 (new-statement {user 1} {is performing} {Shopping cart development})
 (new-statement {user 3} {is performing} {CNN for product recommendation})
+(new-statement {user 3} {is performing} {VR Game Development} )
 
 ;;; Create instances of {software resources} then Create {requires} Relations
 (new-statement {CNN for product recommendation} {requires software} (new-indv NIL {Expresso}))
@@ -50,6 +55,8 @@
 (new-statement {Apache server configure} {requires software} (new-indv NIL {Apache}))
 (new-statement {VR Game Development} {requires processor} (new-indv NIL {Nvidia GeForce GTX_1060}))
 (new-statement {VR Game Development} {requires processor} (new-indv NIL {Intel Core CPU_i5}))
+(new-statement {VR Game Development} {requires operating system} (new-indv NIL {MacOS 10.2}))
+
 ;;; Create {is authorized to execute} Relations
 (new-statement {user} {is authorized to execute} {python})
 (new-statement {data scientist} {is authorized to execute} {Expresso})

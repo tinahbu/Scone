@@ -43,6 +43,13 @@
 (new-type {AMD Radeon RX_390} {AMD})
 (new-type {AMD Radeon RX_290} {AMD})
 
+;;; Different types of operating system
+(new-split-subtypes {operating system}  '({MacOS} {Linux} {Windows}))
+(new-type {MacOS 10.2} {MacOS})
+(new-type {MacOS 10.6} {MacOS})
+(new-type {Windows 8} {Windows})
+(new-type {Windows 10} {Windows})
+
 ;;;
 ;;; USER
 ;;;
@@ -57,7 +64,6 @@
 
 ;;; Add Default User Group to {user} with the least privilege
 (new-type {default user} {user})
-
 
 ;;;
 ;;; role-node of hardware
@@ -176,6 +182,10 @@
 (x-is-the-y-of-z (new-string {"AMD Radeon RX"}) {brand of hardware resources} {AMD Radeon RX_470})
 (x-is-the-y-of-z (new-string {"AMD Radeon RX"}) {brand of hardware resources} {AMD Radeon RX_390})
 (x-is-the-y-of-z (new-string {"AMD Radeon RX"}) {brand of hardware resources} {AMD Radeon RX_290})
+(x-is-the-y-of-z (new-string {"10.2"}) {version of operating system} {MacOS 10.2})
+(x-is-the-y-of-z (new-string {"10.6"}) {version of operating system} {MacOS 10.6})
+(x-is-the-y-of-z (new-string {"8"}) {version of operating system} {Windows 8})
+(x-is-the-y-of-z (new-string {"10"}) {version of operating system} {Windows 10})
 
 ;;;
 ;;; RELATIONS
@@ -755,9 +765,23 @@
           (setq brand (node-value (the-x-of-y {version of hardware resources} x))))))
   brand
 )
-          
-;;; Add processor to invidual user
-(defun user_has_processor (user processor)
-  (x-is-a-y-of-z (new-indv NIL processor) {processor of user} user)
-)
 
+;;; Given a user and a task, returns t if the user's operating system meets the task's os requirements
+;;; returns nil if it doesn't
+
+;;; test case: (task_check_os {user 3} {VR Game Development})
+(defun task_check_os (user task)
+    (setq result nil)
+    ;;; Check what kind of os the user has
+    (setq user_os (the-x-of-y {os of user} user))
+    ;;; Check what version it is
+    (setq user_os_version (node-value (the-x-of-y {version of operating system} user_os)))
+    (setq task_os_list (list-rel {requires operating system} task))
+    (loop for x in task_os_list do 
+      (progn
+        (setq task_os_version (node-value (the-x-of-y {version of operating system} x)))
+        (if (is-x-a-y? user_os x) (if (string< task_os_version user_os_version) (setq result t) ()) ())
+      )
+    )
+    result
+  )
