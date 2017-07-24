@@ -666,18 +666,32 @@
 ;;; Example: (access_check {user 3} {CNN for product recommendation})
 
 ;;; (authorized_to_use? {user 1} {Expresso})
+;;; (authorized_to_use? {user 3} {Python})
 (defun authorized_to_use? (user software)
-  (setq softwareList '())
-  (setq tmp '())
-  (setq cond2 "NIL")
-  (setq cond1 (statement-true? user {is authorized to execute} software))
-  (with-markers (m1)
-    (progn
-      (mark-role-inverse {member of user} user m1)
-      (do-marked (x m1)
-        (setq tmp (statement-true? x {is authorized to execute} software))
-        (if (string= tmp "T") (cond2 = "T") ()))))
-  (if (or (string= cond1 "T") (string= cond2 "T")) ("T") ("NIL")))
+    (setq cond1 (statement-true? user {is authorized to execute} software))
+    (setq cond2 nil)
+    (with-markers (m1)
+      (progn
+        (mark-role-inverse {member of user} user m1)
+        (do-marked (x m1)
+            (setq tmp (statement-true? x {is authorized to execute} software))
+            (setq cond2 (if tmp t nil))
+        )))
+    (if (or cond1 cond2) (print "t") (print "nil"))
+)
+
+; (defun authorized_to_use? (user software)
+;   (setq softwareList '())
+;   (setq tmp '())
+;   (setq cond2 "NIL")
+;   (setq cond1 (statement-true? user {is authorized to execute} software))
+;   (with-markers (m1)
+;     (progn
+;       (mark-role-inverse {member of user} user m1)
+;       (do-marked (x m1)
+;         (setq tmp (statement-true? x {is authorized to execute} software))
+;         (if (string= tmp "T") (cond2 = "T") ()))))
+;   (if (or (string= cond1 "T") (string= cond2 "T")) ("T") ("NIL")))
 
 
 ;;; Check whether the user has the required CPU according to specific task requirement
