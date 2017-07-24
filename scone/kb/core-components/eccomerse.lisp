@@ -16,7 +16,7 @@
 (new-type {task} {action})
 (new-type {resources} {thing})
 
-;;; Detailed resources: software, hardware
+;;; Detailed resources: software, hardware, operating system
 (new-type {software resources} {resources})
 (new-type {hardware resources} {resources})
 (new-type {operating system} {resources})
@@ -65,11 +65,11 @@
 ;;; Add Default User Group to {user} with the least privilege
 (new-type {default user} {user})
 
-;;;
+
 ;;; role-node of hardware
 (new-indv-role {version of hardware resources} {hardware resources} {string})
 (new-indv-role {brand of hardware resources} {hardware resources} {string})
-;;;
+
 
 ;;; role node of operating system
 (new-indv-role {version of operating system} {operating system} {string})
@@ -680,11 +680,10 @@
   (if (or (string= cond1 "T") (string= cond2 "T")) ("T") ("NIL")))
 
 
-;;; Check whether the user has the required processor according to specific task requirement
-;;; Example (task_check_user_hardware {user 6} {VR Game Development})
-(defun task_check_user_hardware (user task)
+;;; Check whether the user has the required CPU according to specific task requirement
+;;; Example (task_check_user_CPU {user 6} {VR Game Development})
+(defun task_check_user_CPU (user task)
   (setq CPUcond nil)
-  (setq GPUcond nil)
   ;;; check what hardware the user installed
   (setq userProcessorList (list-all-x-of-y {processor of user} user))
   (setq userCPUbrand "")
@@ -698,6 +697,22 @@
     )
     ())
   )
+
+  ;;; check what hardware the task requires
+  (setq CPUbrand (task_CPU_brand task))
+  (setq CPUversion (task_CPU_version task))  
+  ;;;Compare CPU brand with the required CPU brand
+  
+  (if (string= userCPUbrand CPUbrand) (if(>= (parse-integer userCPUversion) (parse-integer CPUversion))(setq CPUcond t)()) ())
+  CPUcond
+)
+
+;;; Check whether the user has the required GPU according to specific task requirement
+;;; Example (task_check_user_GPU {user 6} {VR Game Development})
+(defun task_check_user_GPU (user task)
+  (setq GPUcond nil)
+  ;;; check what hardware the user installed
+  (setq userProcessorList (list-all-x-of-y {processor of user} user))
   (setq userGPUbrand "")
   (setq userGPUversion "")
   (loop for x in userProcessorList do 
@@ -712,13 +727,10 @@
   ;;; check what hardware the task requires
   (setq GPUbrand (task_GPU_brand task))
   (setq GPUversion (task_GPU_version task))
-  (setq CPUbrand (task_CPU_brand task))
-  (setq CPUversion (task_CPU_version task))  
-  ;;;Compare CPU brand with the required CPU brand
   
-  (if (string= userCPUbrand CPUbrand) (if(>= (parse-integer userCPUversion) (parse-integer CPUversion))(setq CPUcond t)()) ())
+  ;;;Compare GPU brand with the required GPU brand
   (if (string= userGPUbrand GPUbrand) (if(>= (parse-integer userGPUversion) (parse-integer GPUversion))(setq GPUcond t)()) ())
-  (values CPUcond GPUcond)
+  GPUcond
 )
 
 
