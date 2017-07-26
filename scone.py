@@ -206,7 +206,7 @@ class Scone(object):
             if res[0] != 'T':
                 nonexisted_software_list.append(software)
             else:
-                scone_input = '(new-statement {%s} {requires} {%s} )' % (task_name, software)
+                scone_input = '(new-statement {%s} {requires software} {%s} )' % (task_name, software)
                 self.communicate(scone_input)
         return nonexisted_software_list
 
