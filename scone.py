@@ -280,7 +280,9 @@ class Scone(object):
     if the user is already in the KB, return 1
     """
 
-    def create_user(self, user_name, user_id, user_email, group_name="default user"):
+    def create_user(self, user_name, user_id, user_email,
+                    user_os, user_processor,
+                    group_name="default user",):
         scone_input = "(indv-node? {%s})" % user_name
         res = self.communicate(scone_input)
         if res is None:
@@ -402,3 +404,67 @@ class Scone(object):
 
     def test(self):
         print self.communicate("")
+
+    # added CPU and GPU
+    # Intel Core CPU,
+    def create_cpu(self, brand_name, new_cpu_version):
+        cpu_full_name = brand_name + "_" + new_cpu_version
+        scone_input = "(type-node? {%s})" % cpu_full_name
+        res = self.communicate(scone_input)
+        if res is None or res[0] == "T":
+            return -1
+
+        scone_input = "(type-node? {%s})" % brand_name
+        res = self.communicate(scone_input)
+        if res is None or res[0] == "NIL":
+            return -2
+
+        scone_input = "(new-type {%s} {%s})" % (cpu_full_name, brand_name)
+        self.communicate(scone_input)
+
+        # (x-is-the-y-of-z (new-string {"3"}) {version of hardware resources} {Intel Core CPU_i3})
+        scone_input = '(x-is-the-y-of-z (new-string {"%s"}) {version of hardware resources} {%s})'\
+                      % (new_cpu_version, cpu_full_name)
+        self.communicate(scone_input)
+        return 0
+
+    def create_gpu(self, brand_name, new_gpu_version):
+        gpu_full_name = brand_name + "_" + new_gpu_version
+        scone_input = "(type-node? {%s})" % gpu_full_name
+        res = self.communicate(scone_input)
+        if res is None or res[0] == "T":
+            return -1
+
+        scone_input = "(type-node? {%s})" % brand_name
+        res = self.communicate(scone_input)
+        if res is None or res[0] == "NIL":
+            return -2
+
+        scone_input = "(new-type {%s} {%s})" % (gpu_full_name, brand_name)
+        self.communicate(scone_input)
+
+        scone_input = '(x-is-the-y-of-z (new-string {"%s"}) {version of hardware resources} {%s})' \
+                      % (new_gpu_version, gpu_full_name)
+        self.communicate(scone_input)
+        return 0
+
+    def create_os(self, brand_of_os, new_version_of_os):
+        os_full_name = brand_of_os + "_" + new_version_of_os
+        scone_input = "(type-node? {%s})" % os_full_name
+        res = self.communicate(scone_input)
+        if res is None or res[0] == "T":
+            return -1
+
+        scone_input = "(type-node? {%s})" % brand_of_os
+        res = self.communicate(scone_input)
+        if res is None or res[0] == "NIL":
+            return -1
+
+        scone_input = "(new-type {%s} {%s})" % (os_full_name, brand_of_os)
+        self.communicate(scone_input)
+
+        # (x-is-the-y-of-z (new-string {"10.2"}) {version of operating system} {MacOS_10.2})
+        scone_input = '(x-is-the-y-of-z (new-string {"%s"}) {version of operating system} {%s})' \
+                      % (new_version_of_os, os_full_name)
+        self.communicate(scone_input)
+        return 0

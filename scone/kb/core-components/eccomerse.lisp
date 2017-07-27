@@ -45,10 +45,10 @@
 
 ;;; Different types of operating system
 (new-split-subtypes {operating system}  '({MacOS} {Linux} {Windows}))
-(new-type {MacOS 10.2} {MacOS})
-(new-type {MacOS 10.6} {MacOS})
-(new-type {Windows 8} {Windows})
-(new-type {Windows 10} {Windows})
+(new-type {MacOS_10.2} {MacOS})
+(new-type {MacOS_10.6} {MacOS})
+(new-type {Windows_8} {Windows})
+(new-type {Windows_10} {Windows})
 
 ;;;
 ;;; USER
@@ -73,7 +73,7 @@
 
 ;;; role node of operating system
 (new-indv-role {version of operating system} {operating system} {string})
-(new-indv-role {brand of operating system} {operating system} {string})
+;;; (new-indv-role {brand of operating system} {operating system} {string})
 
 ;;; Add Role Node to {software resources}
 (new-indv-role {version of software resources} {software resources} {string})
@@ -133,6 +133,7 @@
 (new-type {python} {software resources})
 (new-type {python_2.7} {python})
 (new-type {python_3.0} {python})
+(new-type {python_3.2} {python})
 (new-type {PHP} {software resources})
 (new-type {snappy} {software resources})
 (new-type {util} {software resources})
@@ -160,6 +161,7 @@
 (x-is-the-y-of-z (new-string {"3.0"}) {version of software resources} {OpenCV_3.0})
 (x-is-the-y-of-z (new-string {"2.7"}) {version of software resources} {python_2.7})
 (x-is-the-y-of-z (new-string {"3.0"}) {version of software resources} {python_3.0})
+(x-is-the-y-of-z (new-string {"3.2"}) {version of software resources} {python_3.2})
 (x-is-the-y-of-z (new-string {"3"}) {version of hardware resources} {Intel Core CPU_i3})
 (x-is-the-y-of-z (new-string {"5"}) {version of hardware resources} {Intel Core CPU_i5})
 (x-is-the-y-of-z (new-string {"7"}) {version of hardware resources} {Intel Core CPU_i7})
@@ -182,10 +184,10 @@
 (x-is-the-y-of-z (new-string {"AMD Radeon RX"}) {brand of hardware resources} {AMD Radeon RX_470})
 (x-is-the-y-of-z (new-string {"AMD Radeon RX"}) {brand of hardware resources} {AMD Radeon RX_390})
 (x-is-the-y-of-z (new-string {"AMD Radeon RX"}) {brand of hardware resources} {AMD Radeon RX_290})
-(x-is-the-y-of-z (new-string {"10.2"}) {version of operating system} {MacOS 10.2})
-(x-is-the-y-of-z (new-string {"10.6"}) {version of operating system} {MacOS 10.6})
-(x-is-the-y-of-z (new-string {"8"}) {version of operating system} {Windows 8})
-(x-is-the-y-of-z (new-string {"10"}) {version of operating system} {Windows 10})
+(x-is-the-y-of-z (new-string {"10.2"}) {version of operating system} {MacOS_10.2})
+(x-is-the-y-of-z (new-string {"10.6"}) {version of operating system} {MacOS_10.6})
+(x-is-the-y-of-z (new-string {"8"}) {version of operating system} {Windows_8})
+(x-is-the-y-of-z (new-string {"10"}) {version of operating system} {Windows_10})
 
 ;;;
 ;;; RELATIONS
@@ -214,6 +216,7 @@
 (new-statement {cookie} {depends on} {debug})
 (new-statement {express} {depends on} {cookie})
 (new-statement {Expresso} {depends on} {python_3.0})
+(new-statement {Expresso} {depends on} {python_3.2})
 (new-statement {Expresso} {depends on} {protobuf})
 (new-statement {Expresso} {depends on} {Caffe})
 (new-statement {express-session} {depends on} {cookie})
@@ -316,11 +319,7 @@
       (mark-instances software m1)
       (do-marked (x m1)
         (setq y (type-node? x))
-        (if (string= y "NIL") (setq softwareList (nconc softwareList (list x))) ())
-      )
-    )
-  )
-
+        (if (string= y "NIL") (setq softwareList (nconc softwareList (list x))) ()))))
   (loop for x in softwareList do (print x)))
 
 ;;; Vulnerability check WITH verison.
@@ -378,11 +377,8 @@
             (do-marked (y m2)
               ;;; Query for all the {task} that {requires software} the potentially impacted {software resource}
               (setq tmp2 (type-node? y))
-              (if (string= tmp2 "T") () (setq taskList (nconc taskList (list-rel-inverse {requires software} y))))
-            )
-            )))))
-  (loop for x in taskList do (print x))
-)
+              (if (string= tmp2 "T") () (setq taskList (nconc taskList (list-rel-inverse {requires software} y))))))))))
+  (loop for x in taskList do (print x)))
 
 ;;; Vulnerability check WITH verison.
 ;;; Given a certain version, softwares that are impacted by the OLDER version (not included)
@@ -407,16 +403,9 @@
             (mark-rel-inverse {depends on} x m2)
             (do-marked (y m2)
               (setq tmp2 (type-node? y))
-              (if(string= "T" tmp2)()(setq softwareList (nconc softwareList (list y))))
-            )
-            (setq softwareList (nconc softwareList (list x)))
-          )
-        )
-      )
-    )
-  )
-  (loop for x in softwareList do (print x))
-)
+              (if(string= "T" tmp2)()(setq softwareList (nconc softwareList (list y)))))
+            (setq softwareList (nconc softwareList (list x))))))))
+  (loop for x in softwareList do (print x)))
 
 ;;; Vulnerability check WITH verison.
 ;;; Given a certain version, users that are impacted by the NEWER version (not included)
@@ -474,11 +463,8 @@
             (do-marked (y m2)
               ;;; Query for all the {task} that {requires software} the potentially impacted {software resource}
               (setq tmp2 (type-node? y))
-              (if (string= tmp2 "T") () (setq taskList (nconc taskList (list-rel-inverse {requires software} y))))
-            )
-            )))))
-  (loop for x in taskList do (print x))
-)
+              (if (string= tmp2 "T") () (setq taskList (nconc taskList (list-rel-inverse {requires software} y))))))))))
+  (loop for x in taskList do (print x)))
 
 ;;; Vulnerability check WITH verison.
 ;;; Given a certain version, softwares that are impacted by the NEWER version (not included)
@@ -503,16 +489,9 @@
             (mark-rel-inverse {depends on} x m2)
             (do-marked (y m2)
               (setq tmp2 (type-node? y))
-              (if(string= "T" tmp2)()(setq softwareList (nconc softwareList (list y))))
-            )
-            (setq softwareList (nconc softwareList (list x)))
-          )
-        )
-      )
-    )
-  )
-  (loop for x in softwareList do (print x))
-)
+              (if(string= "T" tmp2)()(setq softwareList (nconc softwareList (list y)))))
+            (setq softwareList (nconc softwareList (list x))))))))
+  (loop for x in softwareList do (print x)))
 
 
 ;;; Vulnerability check WITH verison.
@@ -572,11 +551,8 @@
             (do-marked (y m2)
               ;;; Query for all the {task} that {requires software} the potentially impacted {software resource}
               (setq tmp2 (type-node? y))
-              (if (string= tmp2 "T") () (setq taskList (nconc taskList (list-rel-inverse {requires software} y))))
-            )
-            )))))
-  (loop for x in taskList do (print x))
-)
+              (if (string= tmp2 "T") () (setq taskList (nconc taskList (list-rel-inverse {requires software} y))))))))))
+  (loop for x in taskList do (print x)))
 
 
 ;;; Vulnerability check WITH verison.
@@ -602,16 +578,9 @@
             (mark-rel-inverse {depends on} x m2)
             (do-marked (y m2)
               (setq tmp2 (type-node? y))
-              (if(string= "T" tmp2)()(setq softwareList (nconc softwareList (list y))))
-            )
-            (setq softwareList (nconc softwareList (list x)))
-          )
-        )
-      )
-    )
-  )
-  (loop for x in softwareList do (print x))
-)
+              (if(string= "T" tmp2)()(setq softwareList (nconc softwareList (list y)))))
+            (setq softwareList (nconc softwareList (list x))))))))
+  (loop for x in softwareList do (print x)))
 
 ;;; Given a user and a task, print a list of softwares that
 ;;; the user is not yet authorized to execute.
@@ -654,8 +623,7 @@
         (setq cond1 (statement-true? user {is authorized to execute} x))
         (mark-role-inverse {member of user} user m2)
         (do-marked (y m2)
-          (setq cond2 (statement-true? y {is authorized to execute} x))
-        )
+          (setq cond2 (statement-true? y {is authorized to execute} x)))
         (if (or (string= cond1 "T") (string= cond2 "T")) () (setq softwareList (nconc softwareList (list x)))))
   (loop for x in softwareList do (print x)))))
 
@@ -675,22 +643,8 @@
         (mark-role-inverse {member of user} user m1)
         (do-marked (x m1)
             (setq tmp (statement-true? x {is authorized to execute} software))
-            (setq cond2 (if tmp t nil))
-        )))
-    (if (or cond1 cond2) (print "t") (print "nil"))
-)
-
-(defun authorized_to_use? (user software)
-    (setq cond1 (statement-true? user {is authorized to execute} software))
-    (setq cond2 nil)
-    (with-markers (m1)
-      (progn
-        (mark-role-inverse {member of user} user m1)
-        (do-marked (x m1)
-            (setq tmp (statement-true? x {is authorized to execute} software))
             (setq cond2 (if tmp t nil)))))
-    (if (or cond1 cond2) (print t) (print nil)))
-
+    (if (or cond1 cond2) (print "t") (print "nil")))
 
 ;;; Check whether the user has the required CPU according to specific task requirement
 ;;; Example (task_check_user_CPU {user 6} {VR Game Development})
@@ -704,11 +658,9 @@
     (setq cpuBoolean (is-x-a-y? x {CPU}))
     (if (string= cpuBoolean "YES") 
     (progn
-    (setq userCPUbrand (node-value (the-x-of-y {brand of hardware resources} x)))
-    (setq userCPUversion (node-value (the-x-of-y {version of hardware resources} x)))
-    )
-    ())
-  )
+      (setq userCPUbrand (node-value (the-x-of-y {brand of hardware resources} x)))
+      (setq userCPUversion (node-value (the-x-of-y {version of hardware resources} x))))
+    ()))
 
   ;;; check what hardware the task requires
   (setq CPUbrand (task_CPU_brand task))
@@ -716,8 +668,7 @@
   ;;;Compare CPU brand with the required CPU brand
   
   (if (string= userCPUbrand CPUbrand) (if(>= (parse-integer userCPUversion) (parse-integer CPUversion))(setq CPUcond t)()) ())
-  CPUcond
-)
+  CPUcond)
 
 ;;; Check whether the user has the required GPU according to specific task requirement
 ;;; Example (task_check_user_GPU {user 6} {VR Game Development})
@@ -730,20 +681,17 @@
   (loop for x in userProcessorList do 
     (setq gpuBoolean (is-x-a-y? x {GPU}))
     (if (string= gpuBoolean "YES") 
-    (progn
-    (setq userGPUBrand (node-value (the-x-of-y {brand of hardware resources} x)))
-    (setq userGPUVersion (node-value (the-x-of-y {version of hardware resources} x)))
-    )
-    ())
-  )
+      (progn
+        (setq userGPUBrand (node-value (the-x-of-y {brand of hardware resources} x)))
+        (setq userGPUVersion (node-value (the-x-of-y {version of hardware resources} x))))
+    ()))
   ;;; check what hardware the task requires
   (setq GPUbrand (task_GPU_brand task))
   (setq GPUversion (task_GPU_version task))
   
   ;;;Compare GPU brand with the required GPU brand
   (if (string= userGPUbrand GPUbrand) (if(>= (parse-integer userGPUversion) (parse-integer GPUversion))(setq GPUcond t)()) ())
-  GPUcond
-)
+  GPUcond)
 
 
 (defun task_GPU_brand (task)
@@ -754,8 +702,7 @@
         (mark-boolean m3 (list m1 m2) ())
         (do-marked (x m3)
           (setq brand (node-value (the-x-of-y {brand of hardware resources} x))))))
-  brand
-)    
+  brand)    
 
 (defun task_CPU_brand (task)
     (with-markers (m1 m2 m3)
@@ -765,8 +712,7 @@
         (mark-boolean m3 (list m1 m2) ())
         (do-marked (x m3)
           (setq brand (node-value (the-x-of-y {brand of hardware resources} x))))))
-  brand
-)
+  brand)
    
 (defun task_GPU_version (task)
     (with-markers (m1 m2 m3)
@@ -776,8 +722,7 @@
         (mark-boolean m3 (list m1 m2) ())
         (do-marked (x m3)
           (setq brand (node-value (the-x-of-y {version of hardware resources} x))))))
-  brand
-)    
+  brand)    
 
 (defun task_CPU_version (task)
     (with-markers (m1 m2 m3)
@@ -787,14 +732,13 @@
         (mark-boolean m3 (list m1 m2) ())
         (do-marked (x m3)
           (setq brand (node-value (the-x-of-y {version of hardware resources} x))))))
-  brand
-)
+  brand)
 
 ;;; Given a user and a task, returns t if the user's operating system meets the task's os requirements
 ;;; returns nil if it doesn't
 
 ;;; test case: (task_check_os {user 3} {VR Game Development})
-(defun task_check_os (user task)
+(defun task_check_user_OS (user task)
     (setq result nil)
     ;;; Check what kind of os the user has
     (setq user_os (the-x-of-y {os of user} user))

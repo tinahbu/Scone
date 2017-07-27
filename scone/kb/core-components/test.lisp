@@ -22,7 +22,7 @@
 ;;; Test User for Operating System Version Category & Check
 (new-indv {user 3} {user})
 (x-is-a-y-of-z {user 3} {member of user} {data scientist})
-(x-is-the-y-of-z (new-indv NIL {MacOS 10.6}) {os of user} {user 3})
+(x-is-the-y-of-z (new-indv NIL {MacOS_10.6}) {os of user} {user 3})
 
 ;;; Test User for CPU, GPU brand & version check
 (new-indv {user 6} {user})
@@ -55,7 +55,7 @@
 (new-statement {Apache server configure} {requires software} (new-indv NIL {Apache}))
 (new-statement {VR Game Development} {requires processor} (new-indv NIL {Nvidia GeForce GTX_1060}))
 (new-statement {VR Game Development} {requires processor} (new-indv NIL {Intel Core CPU_i5}))
-(new-statement {VR Game Development} {requires operating system} (new-indv NIL {MacOS 10.2}))
+(new-statement {VR Game Development} {requires operating system} (new-indv NIL {MacOS_10.2}))
 
 ;;; Create {is authorized to execute} Relations
 (new-statement {user} {is authorized to execute} {python})
@@ -72,6 +72,12 @@
 (new-statement {python} {depends on} {urllib})
 (new-statement {python} {depends on} {urllib2})
 (new-statement {python} {depends on} {xmlrpclib})
+
+
+
+
+
+
 
 
 
