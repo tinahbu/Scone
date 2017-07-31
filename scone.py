@@ -282,7 +282,7 @@ class Scone(object):
     """
 
     def create_user(self, user_name, user_id, user_email,
-                    user_os, user_processor,
+                    user_os_full_name, user_processor_full_name,
                     group_name="default user",):
         scone_input = "(indv-node? {%s})" % user_name
         res = self.communicate(scone_input)
@@ -291,14 +291,23 @@ class Scone(object):
         if res[0] != "NIL":
             return 1
 
-        scone_input = "(type-node? {%s})" % group_name
+        scone_input = "(type-node? {%s})" % user_os_full_name
         res = self.communicate(scone_input)
         if res is None or res[0] == "NIL":
             return -1
+
+        scone_input = "(type-node? {%s})" % user_processor_full_name
+        res = self.communicate(scone_input)
+        if res is None or res[0] == "NIL":
+            return -1
+        # (x-is-the-y-of-z (new-indv NIL {MacOS_10.6}) {os of user} {user 3})
+        # (x-is-a-y-of-z (new-indv NIL {Intel Core CPU_i5}) {processor of user} {user 6})
         scone_inputs = ["(new-indv {%s} {default user})" % user_name,
                         "(x-is-the-y-of-z (new-string {\"{%s}\"}) {username of user} {%s})" % (user_name, user_name),
                         "(x-is-the-y-of-z (new-string {\"{%s}\"}) {email of user} {%s})" % (user_email, user_name),
                         "(x-is-the-y-of-z (new-string {\"{%s}\"}) {userid of user} {%s})" % (user_id, user_name),
+                        "(x-is-the-y-of-z (new-indv NIL {%s}) {os of user} {%s})" % (user_os_full_name, user_name),
+                        "(x-is-the-y-of-z (new-indv NIL {%s}) {processor of user} {%s})" % (user_processor_full_name, user_name),
                         "(x-is-a-y-of-z {%s} {member of user} {%s})" % (user_name, group_name)]
         for i, scone_input in enumerate(scone_inputs):
             if self.communicate(scone_input) is None:
@@ -407,8 +416,12 @@ class Scone(object):
     def test(self):
         print self.communicate("")
 
-    # added CPU and GPU
-    # Intel Core CPU,
+    '''
+        Create a new gpu given a existed cpu brand and a new cpu version
+        return -1 if this new version already exists
+               -2 if brand name does not exist
+               0  if creates successfully
+    '''
     def create_cpu(self, brand_name, new_cpu_version):
         cpu_full_name = brand_name + "_" + new_cpu_version
         scone_input = "(type-node? {%s})" % cpu_full_name
@@ -430,6 +443,12 @@ class Scone(object):
         self.communicate(scone_input)
         return 0
 
+    '''
+        Create a new gpu given a existed cpu brand and a new cpu version
+        return -1 if this new version already exists
+               -2 if brand name does not exist
+               0  if creates successfully
+    '''
     def create_gpu(self, brand_name, new_gpu_version):
         gpu_full_name = brand_name + "_" + new_gpu_version
         scone_input = "(type-node? {%s})" % gpu_full_name
@@ -450,6 +469,12 @@ class Scone(object):
         self.communicate(scone_input)
         return 0
 
+    '''
+        Create a new os given a existed cpu brand and a new cpu version
+        return -1 if this new version already exists
+               -2 if brand name does not exist
+               0  if creates successfully
+    '''
     def create_os(self, brand_of_os, new_version_of_os):
         os_full_name = brand_of_os + "_" + new_version_of_os
         scone_input = "(type-node? {%s})" % os_full_name
@@ -460,7 +485,7 @@ class Scone(object):
         scone_input = "(type-node? {%s})" % brand_of_os
         res = self.communicate(scone_input)
         if res is None or res[0] == "NIL":
-            return -1
+            return -2
 
         scone_input = "(new-type {%s} {%s})" % (os_full_name, brand_of_os)
         self.communicate(scone_input)
