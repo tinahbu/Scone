@@ -48,12 +48,13 @@ def main():
         print "10: Create a new user group"
         print "11: Check if user can execute this software"
         print "12: Check if some target has this vulnerability"
+        print "13: Show details of added vulnerability in the KB"  # fake, stored in python engine
         str_input = raw_input()
         if not str_input.isdigit():
             print "Invalid input! Please try again"
             continue
         user_input = int(str_input)
-        if user_input < 1 or user_input > 12:
+        if user_input < 1 or user_input > 13:
             print "Invalid input! Please try again"
             continue
         if user_input == 1:
@@ -70,7 +71,11 @@ def main():
             if res == -1:
                 print "This software already exists"
             else:
-                print "Those software and version creation succeeds: " + ", ".join(res)
+                print "Those software and version creation succeeds: "
+                for r in res:
+                    print r[0]
+                    if r[1]:
+                        print "ALERT: See vulnerability #" + ', '.join(map(str, r[1])) + ' for why the above newly added software has vulnerability'
         elif user_input == 2:
             print "Please enter the software name:"
             software_name = raw_input()
@@ -242,12 +247,26 @@ def main():
             else:
                 version = None
                 compare = None
-            res = SCONE.check_vulnerability(target, software_name, version, compare)
+            res = SCONE.check_vulnerability_and_add_it(target, software_name, version, compare)
             if res == -1:
                 print 'software not exists'
                 continue
             print 'List of ' + target + ' affected:'
             print ', '.join(res)
+        elif user_input == 13:
+            print "Input the number of the vulnerability"
+            user_input = raw_input()
+            if not user_input.isdigit():
+                break
+            res = SCONE.get_software_vulnerability(int(user_input))
+            if res == -1:
+                print "Invalid number of vulnerability"
+                break
+            else:
+                if res[1] is None:
+                    print "Software %s has vulnerability" % res[0]
+                else:
+                    print "Software %s with version %s %s has vulnerability" % (res[0], res[2], res[1])
         else:
             print "invalid input! Please try again"
             continue

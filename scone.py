@@ -12,6 +12,8 @@ ERROR_MESSAGE = '\nERROR'  # we disable debug mode and hook it to a special stin
 @Pyro4.expose
 class Scone(object):
     def __init__(self):
+        self.vulnerabilities = []   # remember all inputted vulnerabilities
+
         self.lock = RLock()
         # redirect sbcl's output and input to PIPE, so we can send string to stdin and stdout, just like what we do in
         # cmd.
@@ -86,18 +88,6 @@ class Scone(object):
         else:
             return res
 
-    def interface1(self):
-        self.lock.acquire()
-        lines = self.communicate('(is-x-a-y? {operating system of Macbook_1} {Linux})')
-        for line in lines:
-            print line
-        self.lock.release()
-
-    def interface2(self):
-        self.lock.acquire()
-        print 456
-        self.lock.release()
-
     """
     Create new_software_name with provided versions in version_list
         Create new_software_name if not exist
@@ -121,7 +111,21 @@ class Scone(object):
             res = self.communicate(scone_input)
             if res is None or res[0] != "{%s_%s}" % (new_software_name, version):
                 return -1
-            rv += [res[0].strip('{}')]
+
+            new_software_name_version = res[0].strip('{}')
+
+            scone_input = "(new-indv NIL {%s_%s})" % (new_software_name, version)
+            res = self.communicate(scone_input)
+            if res is None:
+                return -1
+
+            # add version info
+            scone_input = ('(x-is-the-y-of-z (new-string {"%s"}) {version of software resources} {%s_%s})'
+                           % (version, new_software_name, version))
+            res = self.communicate(scone_input)
+            if res is None:
+                return -1
+            rv += [[new_software_name_version, self.check_all_vulnerability("software", new_software_name_version)]]
         return rv
 
     """
@@ -161,17 +165,9 @@ class Scone(object):
             return -1
 
         if self.create_software(software_name, [new_version]) == -1:
-            rv = 1
+            return 1
         else:
-            rv = 0
-
-        scone_input = ('(x-is-the-y-of-z (new-string {\"%s\"}) {version of software resources} {%s_%s})'
-                       % (new_version, software_name, new_version))
-        res = self.communicate(scone_input)
-        if res is None:
-            return -1
-        else:
-            return rv
+            return 0
 
     """
     Create a individual task from task type
@@ -347,7 +343,52 @@ class Scone(object):
             return False
         else:
             return True
+        # continue checking user's group's access
 
+    """
+    Add new vulnerability (rule) into of our detection system
+    """
+    def add_software_vulnerability(self, software_name, version=None, compare=None):
+        self.vulnerabilities += [[software_name, version, compare]]
+
+    """
+    return the vul at index as a [software_name, version, compare] list
+    """
+    def get_software_vulnerability(self, index):
+        if index < 0 or index > len(self.vulnerabilities):
+            return -1
+        return self.vulnerabilities[index]
+
+    """
+    Examining already added vulnerabilities for the given newly added software/task/user
+    target is either software/task/user, item is the name of the software/task/user,
+    note that software may include version in the string representation
+
+    return all indexes of vulnerability that will affect the item
+    """
+    def check_all_vulnerability(self, target, item):
+        r = []
+        for i, [software_name, version, compare] in enumerate(self.vulnerabilities):
+            res = self.check_vulnerability(target, software_name, version, compare)
+            # print res, target, software_name, version, compare
+            if res != - 1 and (item in res):
+                r += [i]
+        return r
+
+    """
+    CLI should call this one, this will remember the added vulnerability
+    """
+    def check_vulnerability_and_add_it(self, target, software_name=None, version=None, compare=None):
+        res = self.check_vulnerability(target, software_name, version, compare)
+        self.add_software_vulnerability(software_name, version, compare)
+        return res
+
+    """
+    Check vulnerability for user/task/software given the reported software_name
+    Return list of affected user/task/software
+    User compare to specify software version range that is affected
+    This will also add the new vulnerability into the vulnerability knowledge base
+    """
     def check_vulnerability(self, target, software_name, version=None, compare=None):
         if target != 'user' and target != 'task' and target != 'software':
             return -1
@@ -374,6 +415,8 @@ class Scone(object):
             res = self.communicate(scone_input)
             if target in ['user', 'task']:
                 return list(set(res[:-1]))
+            if compare == 'equal':
+                return list(set(map(lambda x: ' '.join(re.split('\s|\{|\}', x)[1:-2]), res[:-1]))) + [software_name + "_" + version]
             return list(set(map(lambda x: ' '.join(re.split('\s|\{|\}', x)[1:-2]), res[:-1])))
 
     """
