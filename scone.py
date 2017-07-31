@@ -206,7 +206,8 @@ class Scone(object):
             if res[0] != 'T':
                 nonexisted_software_list.append(software)
             else:
-                scone_input = '(new-statement {%s} {requires software} {%s} )' % (task_name, software)
+                # (new-statement {CNN for product recommendation} {requires software} (new-indv NIL {Python_3.0}))
+                scone_input = '(new-statement {%s} {requires software} (new-indv NIL {%s}) )' % (task_name, software)
                 self.communicate(scone_input)
         return nonexisted_software_list
 
@@ -391,6 +392,7 @@ class Scone(object):
         res = self.communicate(scone_input)
         if res[0] != 'T':
             return -1
+
         scone_input = '(access_check {%s} {%s})' % (user_name, task)
         res = self.communicate(scone_input)
         return list(set(map(lambda x : ' '.join(re.split('\s|\{|\}', x)[1:-2]), res[:-1])))
