@@ -154,7 +154,6 @@
 (new-type {Oracle Fusion Middleware_8.5.1} {Oracle Fusion Middleware})
 (new-type {Oracle Outside In Technology} {software resources})
 
-
 ;;; Assign Version Value to Software's {version of software resources} role node
 (x-is-the-y-of-z (new-string {"1.55"}) {version of software resources} {Boost_1.55})
 (x-is-the-y-of-z (new-string {"5.0"}) {version of software resources} {CUDA_5.0})

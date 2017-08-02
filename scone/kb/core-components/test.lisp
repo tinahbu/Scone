@@ -39,22 +39,22 @@
 ;;;
 ;;; Create New Individual Tasks
 (new-indv {Shopping cart development} {task})
-(new-indv {CNN for product recommendation} {task})
+; (new-indv {CNN for product recommendation} {task})
 (new-indv {Apache server configure} {task})
 (new-indv {VR Game Development} {task})
 
 ;;; Create {performs} Relations
 (new-statement {user 1} {is performing} {Apache server configure})
 (new-statement {user 1} {is performing} {Shopping cart development})
-(new-statement {user 3} {is performing} {CNN for product recommendation})
+; (new-statement {user 3} {is performing} {CNN for product recommendation})
 (new-statement {user 3} {is performing} {VR Game Development} )
 
 ;;; Create instances of {software resources} then Create {requires} Relations
-(new-statement {CNN for product recommendation} {requires software} (new-indv NIL {Expresso}))
-(new-statement {CNN for product recommendation} {requires software} (new-indv NIL {Python_3.0}))
-(new-statement {CNN for product recommendation} {requires software} (new-indv NIL {httplib}))
-(new-statement {CNN for product recommendation} {requires processor} (new-indv NIL {Nvidia GeForce GTX_1060}))
-(new-statement {CNN for product recommendation} {requires processor} (new-indv NIL {Intel Core CPU_i5}))
+; (new-statement {CNN for product recommendation} {requires software} (new-indv NIL {Expresso}))
+; (new-statement {CNN for product recommendation} {requires software} (new-indv NIL {Python_3.0}))
+; (new-statement {CNN for product recommendation} {requires software} (new-indv NIL {httplib}))
+; (new-statement {CNN for product recommendation} {requires processor} (new-indv NIL {Nvidia GeForce GTX_1060}))
+; (new-statement {CNN for product recommendation} {requires processor} (new-indv NIL {Intel Core CPU_i5}))
 (new-statement {Shopping cart development} {requires software} (new-indv NIL {tornado}))
 (new-statement {Shopping cart development} {requires software} (new-indv NIL {Laravel}))
 (new-statement {Shopping cart development} {requires software} (new-indv NIL {Node.js}))
