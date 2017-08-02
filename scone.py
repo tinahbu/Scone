@@ -243,7 +243,19 @@ class Scone(object):
         scone_input = "(indv-node? {%s})" % user_name
         res = self.communicate(scone_input)
         if res[0] != 'T':
-            return -1
+            return -2
+
+        scone_input = '(task_check_user_CPU {%s} {%s})' \
+                      % (user_name, task_name)
+        res = self.communicate(scone_input)
+        if res is None or res[0] == "NIL":
+            return -3
+
+        scone_input = '(task_check_user_GPU {%s} {%s})' \
+                      % (user_name, task_name)
+        res = self.communicate(scone_input)
+        if res is None or res[0] == "NIL":
+            return -4
 
         # access_check (user task)
         scone_input = '(access_check {%s} {%s})' % (user_name, task_name)
