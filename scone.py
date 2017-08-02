@@ -575,7 +575,12 @@ class Scone(object):
         return 0
 
     '''
-    
+    Check whether user have enough hardware resources to perform this task
+    return 1,  if user can
+           0,  if user cannot
+           -1, if hardware_type is invalid
+           -2, if task does not exist
+           -3, if user does not exist
     '''
     # (task_check_user_CPU {user 6} {VR Game Development})
     def task_check_user_hardware(self, hardware_type, task_name, user_name):

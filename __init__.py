@@ -39,6 +39,10 @@ def main():
         print '1:  Create a new software that installed on current machine'
         print "2:  Set a existed software's dependencies"
         print "3:  Install a software with more version"
+        print "xx: Create a new CPU or GPU"
+        print "xx: Create a new OS"
+        print "xx: Set the processor requirements of a existed task"
+
         print "4:  Create a new task"
         print "5:  Set the software requirements of a existed task"
         print "6:  Let a user perform an existed task"
@@ -48,6 +52,7 @@ def main():
         print "10: Create a new user group"
         print "11: Check if user can execute this software"
         print "12: Check if some target has this vulnerability"
+        print "xx: Check if user have enough hardware resources to perform the task"
         print "13: Show details of added vulnerability in the KB"  # fake, stored in python engine
         str_input = raw_input()
         if not str_input.isdigit():
