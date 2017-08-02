@@ -176,6 +176,7 @@ def main():
             else:
                 print "Assigning succeeds"
         elif user_input == 9:
+            # create_user
             print "Please enter a new user name:"
             new_user_name = raw_input()
             print "Please enter a user id:"
@@ -184,11 +185,19 @@ def main():
             user_email = raw_input()
             print "Please assign a user group:"
             group_name = raw_input()
-            res = SCONE.create_user(new_user_name, user_id, user_email, group_name)
+            print "Please enter an existed operating system:"
+            os_name = raw_input()
+            print "Please enter an existed processor:"
+            processor_name = raw_input()
+            res = SCONE.create_user(new_user_name, user_id, user_email, os_name, processor_name, group_name)
             if res == 1:
                 print "User already exists"
             elif res == 0:
                 print "User create succeeds"
+            elif res == -2:
+                print "operating system does not exist"
+            elif res == 3:
+                print "processor does not exist"
             else:
                 print "Group does not exist"
         elif user_input == 10:

@@ -84,6 +84,7 @@ class Scone(object):
         self.lock.release()
         res = self.read_output()
         if res[0].startswith(ERROR_MESSAGE):
+            print my_input
             return None
         else:
             return res
@@ -208,6 +209,26 @@ class Scone(object):
         return nonexisted_software_list
 
     """
+    Assign hardware to specific task
+    return 0, if succeeds
+           -1, if task does not exist
+           -2, if processor does not exist
+    """
+
+    def user_task_requires_hardware(self, task_name, processor_full_name):
+        scone_input = "(indv-node? {%s})" % task_name
+        res = self.communicate(scone_input)
+        if res[0] != 'T':
+            return -1
+        scone_input = "(type-node? {%s})" % processor_full_name
+        res = self.communicate(scone_input)
+        if res[0] != 'T':
+            return -2
+        scone_input = '(new-statement {%s} {requires processor} (new-indv NIL {%s}) )' % (task_name, processor_full_name)
+        self.communicate(scone_input)
+        return 0
+
+    """
     Set task's performer to a user
     return the list of softwares that needs user first gain authorization of it
            -1, if task or user does not exist
@@ -236,7 +257,7 @@ class Scone(object):
         return 0
 
     """
-    Create a {is authorized to execute} relation between user/user group and list of softwares
+    Create a {is authorized to execute} relation between user group and list of softwares
     return -1 if failed
             0 if success
     """
@@ -244,6 +265,18 @@ class Scone(object):
     def user_group_is_authorized_to_exec(self, user_group, softwares=[]):
         for software in softwares:
             scone_input = "(new-statement {%s} {is authorized to execute} {%s})" % (user_group, software)
+            if self.communicate(scone_input) is None:  # TODO: rollback all authorization of not?
+                return -1
+        return 0
+
+    """
+    Create a {is authorized to execute} relation between user and list of softwares
+    return -1 if failed
+            0 if success
+    """
+    def user_is_authorized_to_exec(self, user, softwares=[]):
+        for software in softwares:
+            scone_input = "(new-statement {%s} {is authorized to execute} {%s})" % (user, software)
             if self.communicate(scone_input) is None:  # TODO: rollback all authorization of not?
                 return -1
         return 0
@@ -273,10 +306,12 @@ class Scone(object):
 
     """
     create new user, assign it to the user_group if provided (or to the default user),
-    if the provided user_group does not exist, return -1
-    if the user is already in the KB, return 1
+    return -1, if the provided user_group does not exist
+           -2, if operating system does not exist
+           -3, if processor does not exist
+           1,  if the user is already in the KB
+           0,  if create successfully
     """
-
     def create_user(self, user_name, user_id, user_email,
                     user_os_full_name, user_processor_full_name,
                     group_name="default user",):
@@ -290,12 +325,12 @@ class Scone(object):
         scone_input = "(type-node? {%s})" % user_os_full_name
         res = self.communicate(scone_input)
         if res is None or res[0] == "NIL":
-            return -1
+            return -2
 
         scone_input = "(type-node? {%s})" % user_processor_full_name
         res = self.communicate(scone_input)
         if res is None or res[0] == "NIL":
-            return -1
+            return -3
         # (x-is-the-y-of-z (new-indv NIL {MacOS_10.6}) {os of user} {user 3})
         # (x-is-a-y-of-z (new-indv NIL {Intel Core CPU_i5}) {processor of user} {user 6})
         scone_inputs = ["(new-indv {%s} {default user})" % user_name,
@@ -538,3 +573,27 @@ class Scone(object):
                       % (new_version_of_os, os_full_name)
         self.communicate(scone_input)
         return 0
+
+    '''
+    
+    '''
+    # (task_check_user_CPU {user 6} {VR Game Development})
+    def task_check_user_hardware(self, hardware_type, task_name, user_name):
+        if hardware_type != 'CPU' and hardware_type != 'GPU':
+            return -1
+        scone_input = "(indv-node? {%s})" % task_name
+        res = self.communicate(scone_input)
+        if res[0] != 'T':
+            return -2
+        scone_input = "(indv-node? {%s})" % user_name
+        res = self.communicate(scone_input)
+        if res[0] != 'T':
+            return -3
+        # task_check_user_CPU
+        scone_input = '(task_check_user_%s {%s} {%s})' \
+                      % (hardware_type, user_name, task_name)
+        res = self.communicate(scone_input)
+        if res is None or res[0] == "NIL":
+            return 0
+        else:
+            return 1

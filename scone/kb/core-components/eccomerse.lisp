@@ -722,7 +722,7 @@
         (mark-boolean m3 (list m1 m2) ())
         (do-marked (x m3)
           (setq brand (node-value (the-x-of-y {version of hardware resources} x))))))
-  brand)    
+  brand)
 
 (defun task_CPU_version (task)
     (with-markers (m1 m2 m3)
