@@ -254,7 +254,9 @@ class Scone(object):
         if len(res) == 1:
             scone_input = "(new-statement {%s} {is performing} {%s})" % (user_name, task_name)
             self.communicate(scone_input)
-        return 0
+            return 0
+        else:
+            return res
 
     """
     Create a {is authorized to execute} relation between user group and list of softwares

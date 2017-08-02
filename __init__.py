@@ -205,9 +205,11 @@ def main():
             res = SCONE.user_task_performed_by(task_name, user_name)
             if res == -1:
                 print "User or task does not exist"
+            elif res == 0:
+                print "Succeeds"
             elif len(res) != 0:
                 print "User has to first gain those software's authorities to perform this task: "
-                print ", ".join(res)
+                print ", ".join(res[:-1])
         elif user_input == 10:
             # create_user
             print "Please enter a new user name:"
