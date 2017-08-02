@@ -48,12 +48,14 @@ def main():
         print "10: Create a new user group"
         print "11: Check if user can execute this software"
         print "12: Check if some target has this vulnerability"
+        print "13: Show details of added vulnerability in the KB"  # fake, stored in python engine
+        print "14: Add demo CVE-2014-9365 into knowledge base"
         str_input = raw_input()
         if not str_input.isdigit():
             print "Invalid input! Please try again"
             continue
         user_input = int(str_input)
-        if user_input < 1 or user_input > 12:
+        if user_input < 1 or user_input > 14:
             print "Invalid input! Please try again"
             continue
         if user_input == 1:
@@ -70,7 +72,11 @@ def main():
             if res == -1:
                 print "This software already exists"
             else:
-                print "Those software and version creation succeeds: " + ", ".join(res)
+                print "Those software and version creation succeeds: "
+                for r in res:
+                    print r[0]
+                    if r[1]:
+                        print "ALERT: See vulnerability #" + ', '.join(map(str, r[1])) + ' for why the above newly added software has vulnerability'
         elif user_input == 2:
             print "Please enter the software name:"
             software_name = raw_input()
@@ -171,6 +177,7 @@ def main():
             else:
                 print "Assigning succeeds"
         elif user_input == 9:
+            # create_user
             print "Please enter a new user name:"
             new_user_name = raw_input()
             print "Please enter a user id:"
@@ -179,11 +186,19 @@ def main():
             user_email = raw_input()
             print "Please assign a user group:"
             group_name = raw_input()
-            res = SCONE.create_user(new_user_name, user_id, user_email, group_name)
+            print "Please enter an existed operating system:"
+            os_name = raw_input()
+            print "Please enter an existed processor:"
+            processor_name = raw_input()
+            res = SCONE.create_user(new_user_name, user_id, user_email, os_name, processor_name, group_name)
             if res == 1:
                 print "User already exists"
             elif res == 0:
                 print "User create succeeds"
+            elif res == -2:
+                print "operating system does not exist"
+            elif res == 3:
+                print "processor does not exist"
             else:
                 print "Group does not exist"
         elif user_input == 10:
@@ -242,12 +257,46 @@ def main():
             else:
                 version = None
                 compare = None
-            res = SCONE.check_vulnerability(target, software_name, version, compare)
-            if res == -1:
+            res = SCONE.check_vulnerability_and_add_it(target, software_name, version, compare)
+            if not res:
                 print 'software not exists'
                 continue
             print 'List of ' + target + ' affected:'
             print ', '.join(res)
+        elif user_input == 13:
+            print "Input the number of the vulnerability"
+            user_input = raw_input()
+            if not user_input.isdigit():
+                break
+            res = SCONE.get_software_vulnerability(int(user_input))
+            if res == -1:
+                print "Invalid number of vulnerability"
+                break
+            else:
+                if res[1] is None:
+                    print "Software %s has vulnerability" % res[0]
+                else:
+                    print "Software %s with version %s %s has vulnerability" % (res[0], res[2], res[1])
+        elif user_input == 14:
+            print "Input new vulnerability rule CVE-2014-9365 into our knowledge base ..."
+            print "CONTENT: The HTTP clients in the (1) httplib, (2) urllib, (3) urllib2, and (4) xmlrpclib libraries " \
+                  "in CPython (aka Python) 2.x before 2.7.9 and 3.x before 3.4.3, when accessing an HTTPS URL, " \
+                  "do not (a) check the certificate against a trust store or verify that the server hostname matches " \
+                  "a domain name in the subject's (b) Common Name or (c) subjectAltName field of the X.509 " \
+                  "certificate, which allows man-in-the-middle attackers to spoof SSL servers via an arbitrary valid " \
+                  "certificate. "
+            print "Loading & checking..."
+            s1 = set(SCONE.check_vulnerability('task', 'httplib'))
+            s2 = set(SCONE.check_vulnerability('task', 'urllib'))
+            s3 = set(SCONE.check_vulnerability('task', 'urllib2'))
+            s4 = set(SCONE.check_vulnerability('task', 'xmlrpclib'))
+            s5 = set(SCONE.check_vulnerability('task', 'python', '1.9', 'newer'))
+            s6 = set(SCONE.check_vulnerability('task', 'python', '2.8', 'older'))
+            s7 = set(SCONE.check_vulnerability('task', 'python', '2.9', 'newer'))
+            s8 = set(SCONE.check_vulnerability('task', 'python', '3.5', 'older'))
+            # union |, intersection &
+            print "Those tasks are affected by rule CVE-2014-9365:"
+            print ', '.join((s1 | s2 | s3 | s4) & ((s5 & s6) | (s7 & s8)))
         else:
             print "invalid input! Please try again"
             continue

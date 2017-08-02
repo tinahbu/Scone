@@ -12,6 +12,8 @@ ERROR_MESSAGE = '\nERROR'  # we disable debug mode and hook it to a special stin
 @Pyro4.expose
 class Scone(object):
     def __init__(self):
+        self.vulnerabilities = []   # remember all inputted vulnerabilities
+
         self.lock = RLock()
         # redirect sbcl's output and input to PIPE, so we can send string to stdin and stdout, just like what we do in
         # cmd.
@@ -82,21 +84,10 @@ class Scone(object):
         self.lock.release()
         res = self.read_output()
         if res[0].startswith(ERROR_MESSAGE):
+            print my_input
             return None
         else:
             return res
-
-    def interface1(self):
-        self.lock.acquire()
-        lines = self.communicate('(is-x-a-y? {operating system of Macbook_1} {Linux})')
-        for line in lines:
-            print line
-        self.lock.release()
-
-    def interface2(self):
-        self.lock.acquire()
-        print 456
-        self.lock.release()
 
     """
     Create new_software_name with provided versions in version_list
@@ -121,7 +112,21 @@ class Scone(object):
             res = self.communicate(scone_input)
             if res is None or res[0] != "{%s_%s}" % (new_software_name, version):
                 return -1
-            rv += [res[0].strip('{}')]
+
+            new_software_name_version = res[0].strip('{}')
+
+            scone_input = "(new-indv NIL {%s_%s})" % (new_software_name, version)
+            res = self.communicate(scone_input)
+            if res is None:
+                return -1
+
+            # add version info
+            scone_input = ('(x-is-the-y-of-z (new-string {"%s"}) {version of software resources} {%s_%s})'
+                           % (version, new_software_name, version))
+            res = self.communicate(scone_input)
+            if res is None:
+                return -1
+            rv += [[new_software_name_version, self.check_all_vulnerability("software", new_software_name_version)]]
         return rv
 
     """
@@ -161,17 +166,9 @@ class Scone(object):
             return -1
 
         if self.create_software(software_name, [new_version]) == -1:
-            rv = 1
+            return 1
         else:
-            rv = 0
-
-        scone_input = ('(x-is-the-y-of-z (new-string {\"%s\"}) {version of software resources} {%s_%s})'
-                       % (new_version, software_name, new_version))
-        res = self.communicate(scone_input)
-        if res is None:
-            return -1
-        else:
-            return rv
+            return 0
 
     """
     Create a individual task from task type
@@ -206,9 +203,30 @@ class Scone(object):
             if res[0] != 'T':
                 nonexisted_software_list.append(software)
             else:
-                scone_input = '(new-statement {%s} {requires software} {%s} )' % (task_name, software)
+                # (new-statement {CNN for product recommendation} {requires software} (new-indv NIL {Python_3.0}))
+                scone_input = '(new-statement {%s} {requires software} (new-indv NIL {%s}) )' % (task_name, software)
                 self.communicate(scone_input)
         return nonexisted_software_list
+
+    """
+    Assign hardware to specific task
+    return 0, if succeeds
+           -1, if task does not exist
+           -2, if processor does not exist
+    """
+
+    def user_task_requires_hardware(self, task_name, processor_full_name):
+        scone_input = "(indv-node? {%s})" % task_name
+        res = self.communicate(scone_input)
+        if res[0] != 'T':
+            return -1
+        scone_input = "(type-node? {%s})" % processor_full_name
+        res = self.communicate(scone_input)
+        if res[0] != 'T':
+            return -2
+        scone_input = '(new-statement {%s} {requires processor} (new-indv NIL {%s}) )' % (task_name, processor_full_name)
+        self.communicate(scone_input)
+        return 0
 
     """
     Set task's performer to a user
@@ -239,7 +257,7 @@ class Scone(object):
         return 0
 
     """
-    Create a {is authorized to execute} relation between user/user group and list of softwares
+    Create a {is authorized to execute} relation between user group and list of softwares
     return -1 if failed
             0 if success
     """
@@ -247,6 +265,18 @@ class Scone(object):
     def user_group_is_authorized_to_exec(self, user_group, softwares=[]):
         for software in softwares:
             scone_input = "(new-statement {%s} {is authorized to execute} {%s})" % (user_group, software)
+            if self.communicate(scone_input) is None:  # TODO: rollback all authorization of not?
+                return -1
+        return 0
+
+    """
+    Create a {is authorized to execute} relation between user and list of softwares
+    return -1 if failed
+            0 if success
+    """
+    def user_is_authorized_to_exec(self, user, softwares=[]):
+        for software in softwares:
+            scone_input = "(new-statement {%s} {is authorized to execute} {%s})" % (user, software)
             if self.communicate(scone_input) is None:  # TODO: rollback all authorization of not?
                 return -1
         return 0
@@ -276,11 +306,15 @@ class Scone(object):
 
     """
     create new user, assign it to the user_group if provided (or to the default user),
-    if the provided user_group does not exist, return -1
-    if the user is already in the KB, return 1
+    return -1, if the provided user_group does not exist
+           -2, if operating system does not exist
+           -3, if processor does not exist
+           1,  if the user is already in the KB
+           0,  if create successfully
     """
-
-    def create_user(self, user_name, user_id, user_email, group_name="default user"):
+    def create_user(self, user_name, user_id, user_email,
+                    user_os_full_name, user_processor_full_name,
+                    group_name="default user",):
         scone_input = "(indv-node? {%s})" % user_name
         res = self.communicate(scone_input)
         if res is None:
@@ -288,14 +322,23 @@ class Scone(object):
         if res[0] != "NIL":
             return 1
 
-        scone_input = "(type-node? {%s})" % group_name
+        scone_input = "(type-node? {%s})" % user_os_full_name
         res = self.communicate(scone_input)
         if res is None or res[0] == "NIL":
-            return -1
+            return -2
+
+        scone_input = "(type-node? {%s})" % user_processor_full_name
+        res = self.communicate(scone_input)
+        if res is None or res[0] == "NIL":
+            return -3
+        # (x-is-the-y-of-z (new-indv NIL {MacOS_10.6}) {os of user} {user 3})
+        # (x-is-a-y-of-z (new-indv NIL {Intel Core CPU_i5}) {processor of user} {user 6})
         scone_inputs = ["(new-indv {%s} {default user})" % user_name,
                         "(x-is-the-y-of-z (new-string {\"{%s}\"}) {username of user} {%s})" % (user_name, user_name),
                         "(x-is-the-y-of-z (new-string {\"{%s}\"}) {email of user} {%s})" % (user_email, user_name),
                         "(x-is-the-y-of-z (new-string {\"{%s}\"}) {userid of user} {%s})" % (user_id, user_name),
+                        "(x-is-the-y-of-z (new-indv NIL {%s}) {os of user} {%s})" % (user_os_full_name, user_name),
+                        "(x-is-the-y-of-z (new-indv NIL {%s}) {processor of user} {%s})" % (user_processor_full_name, user_name),
                         "(x-is-a-y-of-z {%s} {member of user} {%s})" % (user_name, group_name)]
         for i, scone_input in enumerate(scone_inputs):
             if self.communicate(scone_input) is None:
@@ -347,33 +390,80 @@ class Scone(object):
             return False
         else:
             return True
+        # continue checking user's group's access
 
+    """
+    Add new vulnerability (rule) into of our detection system
+    """
+    def add_software_vulnerability(self, software_name, version=None, compare=None):
+        self.vulnerabilities += [[software_name, version, compare]]
+
+    """
+    return the vul at index as a [software_name, version, compare] list
+    """
+    def get_software_vulnerability(self, index):
+        if index < 0 or index > len(self.vulnerabilities):
+            return -1
+        return self.vulnerabilities[index]
+
+    """
+    Examining already added vulnerabilities for the given newly added software/task/user
+    target is either software/task/user, item is the name of the software/task/user,
+    note that software may include version in the string representation
+
+    return all indexes of vulnerability that will affect the item
+    """
+    def check_all_vulnerability(self, target, item):
+        r = []
+        for i, [software_name, version, compare] in enumerate(self.vulnerabilities):
+            res = self.check_vulnerability(target, software_name, version, compare)
+            # print res, target, software_name, version, compare
+            if res != [] and (item in res):
+                r += [i]
+        return r
+
+    """
+    CLI should call this one, this will remember the added vulnerability
+    """
+    def check_vulnerability_and_add_it(self, target, software_name=None, version=None, compare=None):
+        res = self.check_vulnerability(target, software_name, version, compare)
+        self.add_software_vulnerability(software_name, version, compare)
+        return res
+
+    """
+    Check vulnerability for user/task/software given the reported software_name
+    Return list of affected user/task/software
+    User compare to specify software version range that is affected
+    This will also add the new vulnerability into the vulnerability knowledge base
+    """
     def check_vulnerability(self, target, software_name, version=None, compare=None):
         if target != 'user' and target != 'task' and target != 'software':
-            return -1
+            return []
         if version is None:
-            scone_input = "(type-node? {%s})" % software_name
-            res = self.communicate(scone_input)
-            if res[0] != 'T':
-                return -1
+            # scone_input = "(type-node? {%s})" % software_name
+            # res = self.communicate(scone_input)
+            # if res[0] != 'T':
+            #     return -1
             # (user_check_vulnerability {OpenSSL})
             scone_input = '(%s_check_vulnerability {%s})' % (target, software_name)
             res = self.communicate(scone_input)
             if target in ['user', 'task']:
-                return list(set(res[:-1]))
+                return list(set(map(lambda x: x[1:-1], res[:-1])))
             return list(set(map(lambda x: ' '.join(re.split('\s|\{|\}', x)[1:-2]), res[:-1])))
         elif compare != 'equal' and compare != 'newer' and compare != 'older':
-            return -1
+            return []
         else:
             # (user_check_vulnerability_newer {python} "2.7")
-            scone_input = "(type-node? {%s})" % (software_name + "_" + version)
-            res = self.communicate(scone_input)
-            if res[0] != 'T':
-                return -1
+            # scone_input = "(type-node? {%s})" % (software_name + "_" + version)
+            # res = self.communicate(scone_input)
+            # if res[0] != 'T':
+            #     return []
             scone_input = '(%s_check_vulnerability_%s {%s} "%s")' % (target, compare, software_name, version)
             res = self.communicate(scone_input)
             if target in ['user', 'task']:
-                return list(set(res[:-1]))
+                return list(set(map(lambda x: x[1:-1], res[:-1])))
+            if compare == 'equal':
+                return list(set(map(lambda x: ' '.join(re.split('\s|\{|\}', x)[1:-2]), res[:-1]))) + [software_name + "_" + version]
             return list(set(map(lambda x: ' '.join(re.split('\s|\{|\}', x)[1:-2]), res[:-1])))
 
     """
@@ -389,6 +479,7 @@ class Scone(object):
         res = self.communicate(scone_input)
         if res[0] != 'T':
             return -1
+
         scone_input = '(access_check {%s} {%s})' % (user_name, task)
         res = self.communicate(scone_input)
         return list(set(map(lambda x : ' '.join(re.split('\s|\{|\}', x)[1:-2]), res[:-1])))
@@ -402,3 +493,107 @@ class Scone(object):
 
     def test(self):
         print self.communicate("")
+
+    '''
+        Create a new gpu given a existed cpu brand and a new cpu version
+        return -1 if this new version already exists
+               -2 if brand name does not exist
+               0  if creates successfully
+    '''
+    def create_cpu(self, brand_name, new_cpu_version):
+        cpu_full_name = brand_name + "_" + new_cpu_version
+        scone_input = "(type-node? {%s})" % cpu_full_name
+        res = self.communicate(scone_input)
+        if res is None or res[0] == "T":
+            return -1
+
+        scone_input = "(type-node? {%s})" % brand_name
+        res = self.communicate(scone_input)
+        if res is None or res[0] == "NIL":
+            return -2
+
+        scone_input = "(new-type {%s} {%s})" % (cpu_full_name, brand_name)
+        self.communicate(scone_input)
+
+        # (x-is-the-y-of-z (new-string {"3"}) {version of hardware resources} {Intel Core CPU_i3})
+        scone_input = '(x-is-the-y-of-z (new-string {"%s"}) {version of hardware resources} {%s})'\
+                      % (new_cpu_version, cpu_full_name)
+        self.communicate(scone_input)
+        return 0
+
+    '''
+        Create a new gpu given a existed cpu brand and a new cpu version
+        return -1 if this new version already exists
+               -2 if brand name does not exist
+               0  if creates successfully
+    '''
+    def create_gpu(self, brand_name, new_gpu_version):
+        gpu_full_name = brand_name + "_" + new_gpu_version
+        scone_input = "(type-node? {%s})" % gpu_full_name
+        res = self.communicate(scone_input)
+        if res is None or res[0] == "T":
+            return -1
+
+        scone_input = "(type-node? {%s})" % brand_name
+        res = self.communicate(scone_input)
+        if res is None or res[0] == "NIL":
+            return -2
+
+        scone_input = "(new-type {%s} {%s})" % (gpu_full_name, brand_name)
+        self.communicate(scone_input)
+
+        scone_input = '(x-is-the-y-of-z (new-string {"%s"}) {version of hardware resources} {%s})' \
+                      % (new_gpu_version, gpu_full_name)
+        self.communicate(scone_input)
+        return 0
+
+    '''
+        Create a new os given a existed cpu brand and a new cpu version
+        return -1 if this new version already exists
+               -2 if brand name does not exist
+               0  if creates successfully
+    '''
+    def create_os(self, brand_of_os, new_version_of_os):
+        os_full_name = brand_of_os + "_" + new_version_of_os
+        scone_input = "(type-node? {%s})" % os_full_name
+        res = self.communicate(scone_input)
+        if res is None or res[0] == "T":
+            return -1
+
+        scone_input = "(type-node? {%s})" % brand_of_os
+        res = self.communicate(scone_input)
+        if res is None or res[0] == "NIL":
+            return -2
+
+        scone_input = "(new-type {%s} {%s})" % (os_full_name, brand_of_os)
+        self.communicate(scone_input)
+
+        # (x-is-the-y-of-z (new-string {"10.2"}) {version of operating system} {MacOS_10.2})
+        scone_input = '(x-is-the-y-of-z (new-string {"%s"}) {version of operating system} {%s})' \
+                      % (new_version_of_os, os_full_name)
+        self.communicate(scone_input)
+        return 0
+
+    '''
+    
+    '''
+    # (task_check_user_CPU {user 6} {VR Game Development})
+    def task_check_user_hardware(self, hardware_type, task_name, user_name):
+        if hardware_type != 'CPU' and hardware_type != 'GPU':
+            return -1
+        scone_input = "(indv-node? {%s})" % task_name
+        res = self.communicate(scone_input)
+        if res[0] != 'T':
+            return -2
+        scone_input = "(indv-node? {%s})" % user_name
+        res = self.communicate(scone_input)
+        if res[0] != 'T':
+            return -3
+        # task_check_user_CPU
+        scone_input = '(task_check_user_%s {%s} {%s})' \
+                      % (hardware_type, user_name, task_name)
+        res = self.communicate(scone_input)
+        if res is None or res[0] == "NIL":
+            return 0
+        else:
+            return 1
