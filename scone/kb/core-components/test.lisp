@@ -19,10 +19,14 @@
 (x-is-a-y-of-z {user 1} {member of user} {frontend developer})
 (new-indv {user 2} {user})
 (x-is-a-y-of-z {user 2} {member of user} {backend developer})
+(new-indv {John Robert} {user})
+(x-is-a-y-of-z {John Robert} {member of user} {backend developer})
+
 ;;; Test User for Operating System Version Category & Check
 (new-indv {user 3} {user})
 (x-is-a-y-of-z {user 3} {member of user} {data scientist})
 (x-is-the-y-of-z (new-indv NIL {MacOS_10.6}) {os of user} {user 3})
+
 
 ;;; Test User for CPU, GPU brand & version check
 (new-indv {user 6} {user})
