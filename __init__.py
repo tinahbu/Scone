@@ -36,34 +36,62 @@ def main():
     SCONE = Pyro4.Proxy('PYRONAME:scone')
     while True:
         print 'Please select the function you want to use (enter number):'
-        print '1:  Create a new software that installed on current machine'
-        print "2:  Set a existed software's dependencies"
-        print "3:  Install a software with more version"
-        print "xx: Create a new CPU or GPU"
-        print "xx: Create a new OS"
-        print "xx: Set the processor requirements of a existed task"
+        print 'Add:'
+        print '    Software:'
+        print '        1. Create a new software that installed on current machine'
+        print "        2. Set a existed software's dependencies"
+        print "        3. Install a software with more version"
+        print '    Hardware:'
+        print '        4. Create a new CPU or GPU'
+        print "        5. Create a new OS"
+        print "        6. Set the processor requirements of an existed task"
+        print '    Task:'
+        print '        7. Create a new task'
+        print "        8. Set the software requirements of a existed task"
+        print "        9. Let a user perform an existed task"
+        print '    User:'
+        print '        10. Create a new user'
+        print "        11. Create a new user group"
+        print "        12. Authorize user group to use an existed software"
+        print "        13. Assign user to existed groups"
+        print 'Query:'
+        print "        14. Check if user can execute this software"
+        print "        15. Check if some target has this vulnerability"
+        print "        16. Check if user have enough hardware resources to perform the task"
+        print "        17. Show details of added vulnerability in the KB"
+        print "        18. Add demo CVE-2014-9365 into knowledge base"
 
-        print "4:  Create a new task"
-        print "5:  Set the software requirements of a existed task"
-        print "6:  Let a user perform an existed task"
-        print "7:  Authorize user group to use an existed software"
-        print "8:  Assign user to existed groups"
-        print "9:  Create a new user"
-        print "10: Create a new user group"
-        print "11: Check if user can execute this software"
-        print "12: Check if some target has this vulnerability"
-        print "xx: Check if user have enough hardware resources to perform the task"
-        print "13: Show details of added vulnerability in the KB"  # fake, stored in python engine
-        print "14: Add demo CVE-2014-9365 into knowledge base"
+        # print '1:  Create a new software that installed on current machine'
+        # print "2:  Set a existed software's dependencies"
+        # print "3:  Install a software with more version"
+        # print "xx: Create a new CPU or GPU"
+        # print "xx: Create a new OS"
+        # print "xx: Set the processor requirements of an existed task"
+        #
+        # print "4:  Create a new task"
+        # print "5:  Set the software requirements of a existed task"
+        # print "6:  Let a user perform an existed task"
+        #
+        # print "7:  Authorize user group to use an existed software"
+        # print "8:  Assign user to existed groups"
+        # print "9:  Create a new user"
+        # print "10: Create a new user group"
+        #
+        # print "11: Check if user can execute this software"
+        # print "12: Check if some target has this vulnerability"
+        # print "xx: Check if user have enough hardware resources to perform the task"
+        # print "13: Show details of added vulnerability in the KB"  # fake, stored in python engine
+        # print "14: Add demo CVE-2014-9365 into knowledge base"
         str_input = raw_input()
         if not str_input.isdigit():
             print "Invalid input! Please try again"
             continue
         user_input = int(str_input)
-        if user_input < 1 or user_input > 14:
+        if user_input < 1 or user_input > 20:
             print "Invalid input! Please try again"
             continue
         if user_input == 1:
+            # Create a new software that installed on current machine
             print "Please enter your new software name: "
             new_software_name = raw_input()
             print "Please enter the list of specific software version (end with single return):"
@@ -83,6 +111,7 @@ def main():
                     if r[1]:
                         print "ALERT: See vulnerability #" + ', '.join(map(str, r[1])) + ' for why the above newly added software has vulnerability'
         elif user_input == 2:
+            # Set a existed software's dependencies
             print "Please enter the software name:"
             software_name = raw_input()
             print "Please enter the list of existed software that is depended by above software (ends with single return):"
@@ -98,6 +127,7 @@ def main():
             else:
                 print "Those software does not exist: " + ", ".join(res)
         elif user_input == 3:
+            # Install a software with more version
             print "Please enter the existed software name:"
             software_name = raw_input()
             print "Please list a new version that will be installed on the system:"
@@ -110,6 +140,57 @@ def main():
             else:
                 print "Software does not exist"
         elif user_input == 4:
+            hardware_type = "None"
+            while hardware_type != "CPU" and hardware_type != "GPU":
+                print "Please enter hardware type(GPU or CPU):"
+                hardware_type = raw_input()
+            print "Please enter brand name:"
+            brand_name = raw_input()
+            print "Pleae enter version:"
+            version = raw_input()
+            if hardware_type == "CPU":
+                ret = SCONE.create_cpu(brand_name, version)
+                if ret == 0:
+                    print "CPU creates successfully"
+                elif ret == -1:
+                    print "This new version already exists"
+                elif ret == -2:
+                    print "Brand name does not exist"
+            else:
+                ret = SCONE.create_gpu(brand_name, version)
+                if ret == 0:
+                    print "GPU creates successfully"
+                elif ret == -1:
+                    print "This new version already exists"
+                elif ret == -2:
+                    print "Brand name does not exist"
+        elif user_input == 5:
+            print "Pleae enter OS brand:"
+            brand = raw_input()
+            print "Please enter OS version:"
+            version = raw_input()
+            ret = SCONE.create_os(brand, version)
+            if ret == 0:
+                print "OS creates successfully"
+            elif ret == -1:
+                print "This new version already exists"
+            elif ret == -2:
+                print "Brand name does not exist"
+        elif user_input == 6:
+            # Set the processor requirements of an existed task
+            # user_task_requires_hardware(self, task_name, processor_full_name):
+            print "Please enter task name:"
+            task_name = raw_input()
+            print "Please enter the full name of the processor:"
+            processor_name = raw_input()
+            ret = SCONE.user_task_requires_hardware(task_name, processor_name)
+            if ret == 0:
+                print "Requires successfully"
+            elif ret == -1:
+                print "Task does not exist"
+            elif ret == -2:
+                print "processor does not exist"
+        elif user_input == 7:
             print "Please enter the new task name:"
             new_task_name = raw_input()
             res = SCONE.user_create_task(new_task_name)
@@ -117,7 +198,7 @@ def main():
                 print "This task already exists"
             else:
                 print "task created successfully"
-        elif user_input == 5:
+        elif user_input == 8:
             # user_task_requires_software
             print "Please enter the existed task name:"
             task_name = raw_input()
@@ -136,7 +217,7 @@ def main():
                 print " ,".join(res)
             else:
                 print "Requirements are added successfully"
-        elif user_input == 6:
+        elif user_input == 9:
             # user_task_performed_by
             print "Please enter the name of user who wants to perform a task:"
             user_name = raw_input()
@@ -148,40 +229,7 @@ def main():
             elif len(res) != 0:
                 print "User has to first gain those software's authorities to perform this task: "
                 print ", ".join(res)
-        elif user_input == 7:
-            # user_group_is_authorized_to_exec
-            print "Please enter the intended user group's name:"
-            group_name = raw_input()
-            print "Please enter the list of software that authorizes user group to execute (ends with single return):"
-            software_list = []
-            while True:
-                software_name = raw_input()
-                if len(software_name) == 0:
-                    break
-                software_list.append(software_name)
-            res = SCONE.user_group_is_authorized_to_exec(group_name, software_list)
-            if res == -1:
-                print "Group or user does not exist"
-            else:
-                print "Authorization succeeds"
-        elif user_input == 8:
-            # assign_user_to_groups
-            print "Please enter intended user's name:"
-            user_name = raw_input()
-            print "Please enter the list of target groups (ends with return):"
-            group_list = []
-            while True:
-                group_name = raw_input()
-                if len(group_name) == 0:
-                    break
-                group_list.append(group_name)
-            res = SCONE.assign_user_to_groups(user_name, group_list)
-            if res != 0:
-                print "Those groups do not exist: "
-                print " ,".join(res)
-            else:
-                print "Assigning succeeds"
-        elif user_input == 9:
+        elif user_input == 10:
             # create_user
             print "Please enter a new user name:"
             new_user_name = raw_input()
@@ -206,7 +254,7 @@ def main():
                 print "processor does not exist"
             else:
                 print "Group does not exist"
-        elif user_input == 10:
+        elif user_input == 11:
             # create_user_group
             print "Please enter the name of group that you want to create:"
             new_group_name = raw_input()
@@ -215,7 +263,40 @@ def main():
                 print "Group already exists"
             else:
                 print "Group create succeeds"
-        elif user_input == 11:
+        elif user_input == 12:
+            # user_group_is_authorized_to_exec
+            print "Please enter the intended user group's name:"
+            group_name = raw_input()
+            print "Please enter the list of software that authorizes user group to execute (ends with single return):"
+            software_list = []
+            while True:
+                software_name = raw_input()
+                if len(software_name) == 0:
+                    break
+                software_list.append(software_name)
+            res = SCONE.user_group_is_authorized_to_exec(group_name, software_list)
+            if res == -1:
+                print "Group or user does not exist"
+            else:
+                print "Authorization succeeds"
+        elif user_input == 13:
+            # assign_user_to_groups
+            print "Please enter intended user's name:"
+            user_name = raw_input()
+            print "Please enter the list of target groups (ends with return):"
+            group_list = []
+            while True:
+                group_name = raw_input()
+                if len(group_name) == 0:
+                    break
+                group_list.append(group_name)
+            res = SCONE.assign_user_to_groups(user_name, group_list)
+            if res != 0:
+                print "Those groups do not exist: "
+                print " ,".join(res)
+            else:
+                print "Assigning succeeds"
+        elif user_input == 14:
             # check_user_can_use_software
             print "Please enter user name:"
             user_name = raw_input()
@@ -228,7 +309,7 @@ def main():
                 print "Yes, this user is authorized to use the software"
             else:
                 print "No, you have to first authorize the user with access privilege"
-        elif user_input == 12:
+        elif user_input == 15:
             while True:
                 print '1: Check which user'
                 print '2: Check which task'
@@ -268,7 +349,23 @@ def main():
                 continue
             print 'List of ' + target + ' affected:'
             print ', '.join(res)
-        elif user_input == 13:
+        elif user_input == 16:
+            # task_check_user_hardware
+            # task_check_user_hardware(self, hardware_type, task_name, user_name)
+            hardware_type = "None"
+            while hardware_type != "CPU" and hardware_type != "GPU":
+                print "Please enter hardware type(GPU or CPU):"
+                hardware_type = raw_input()
+            print "Please enter task name:"
+            task_name = raw_input()
+            print "Please enter user name:"
+            user_name = raw_input()
+            ret = SCONE.task_check_user_hardware(hardware_type, task_name, user_name)
+            if ret == 0:
+                print "User cannot perform this task, because he has no required hardware"
+            else:
+                print "User can perform this task"
+        elif user_input == 17:
             print "Input the number of the vulnerability"
             user_input = raw_input()
             if not user_input.isdigit():
@@ -282,7 +379,7 @@ def main():
                     print "Software %s has vulnerability" % res[0]
                 else:
                     print "Software %s with version %s %s has vulnerability" % (res[0], res[2], res[1])
-        elif user_input == 14:
+        elif user_input == 18:
             print "Input new vulnerability rule CVE-2014-9365 into our knowledge base ..."
             print "CONTENT: The HTTP clients in the (1) httplib, (2) urllib, (3) urllib2, and (4) xmlrpclib libraries " \
                   "in CPython (aka Python) 2.x before 2.7.9 and 3.x before 3.4.3, when accessing an HTTPS URL, " \
