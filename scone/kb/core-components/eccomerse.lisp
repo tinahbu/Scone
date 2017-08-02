@@ -70,7 +70,6 @@
 (new-indv-role {version of hardware resources} {hardware resources} {string})
 (new-indv-role {brand of hardware resources} {hardware resources} {string})
 
-
 ;;; role node of operating system
 (new-indv-role {version of operating system} {operating system} {string})
 (new-indv-role {brand of operating system} {operating system} {string})
@@ -149,6 +148,11 @@
 (new-type {urllib} {software resources})
 (new-type {urllib2} {software resources})
 (new-type {xmlrpclib} {software resources})
+(new-type {Oracle} {software resources})
+(new-type {Oracle Fusion Middleware} {software resources})
+(new-type {Oracle Fusion Middleware_8.5.1} {Oracle Fusion Middleware})
+(new-type {Oracle Outside In Technology} {software resources})
+
 
 ;;; Assign Version Value to Software's {version of software resources} role node
 (x-is-the-y-of-z (new-string {"1.55"}) {version of software resources} {Boost_1.55})
@@ -174,10 +178,10 @@
 (x-is-the-y-of-z (new-string {"Nvidia GeForce GTX"}) {brand of hardware resources} {Nvidia GeForce GTX_1060})
 (x-is-the-y-of-z (new-string {"Nvidia GeForce GTX"}) {brand of hardware resources} {Nvidia GeForce GTX_1050})
 (x-is-the-y-of-z (new-string {"Nvidia GeForce GTX"}) {brand of hardware resources} {Nvidia GeForce GTX_980})
-(x-is-the-y-of-z (new-string {"580"}) {version of hardware resources} {Radeon RX_580})
-(x-is-the-y-of-z (new-string {"470"}) {version of hardware resources} {Radeon RX_470})
-(x-is-the-y-of-z (new-string {"390"}) {version of hardware resources} {Radeon RX_390})
-(x-is-the-y-of-z (new-string {"290"}) {version of hardware resources} {Radeon RX_290})
+(x-is-the-y-of-z (new-string {"580"}) {version of hardware resources} {AMD Radeon RX_580})
+(x-is-the-y-of-z (new-string {"470"}) {version of hardware resources} {AMD Radeon RX_470})
+(x-is-the-y-of-z (new-string {"390"}) {version of hardware resources} {AMD Radeon RX_390})
+(x-is-the-y-of-z (new-string {"290"}) {version of hardware resources} {AMD Radeon RX_290})
 (x-is-the-y-of-z (new-string {"AMD Radeon RX"}) {brand of hardware resources} {AMD Radeon RX_580})
 (x-is-the-y-of-z (new-string {"AMD Radeon RX"}) {brand of hardware resources} {AMD Radeon RX_470})
 (x-is-the-y-of-z (new-string {"AMD Radeon RX"}) {brand of hardware resources} {AMD Radeon RX_390})
@@ -186,7 +190,7 @@
 (x-is-the-y-of-z (new-string {"10.6"}) {version of operating system} {MacOS 10.6})
 (x-is-the-y-of-z (new-string {"8"}) {version of operating system} {Windows 8})
 (x-is-the-y-of-z (new-string {"10"}) {version of operating system} {Windows 10})
-
+(x-is-the-y-of-z (new-string {"8.5.1"}) {version of software resources} {Oracle Fusion Middleware_8.5.1})
 ;;;
 ;;; RELATIONS
 ;;;
@@ -265,7 +269,7 @@
 (new-statement {Numpy} {depends on} {python})
 (new-statement {Hadoop} {depends on} {JDK})
 (new-statement {Hadoop} {depends on} {Maven})
-
+(new-statement {Oracle Outside In Technology} {depends on} {Oracle Fusion Middleware})
 ;;; *********Functions******************************
 
 ;;; Vulnerability check without verison. Users that are impacted by the
@@ -400,10 +404,11 @@
           (node-value (the-x-of-y {version of software resources} x)))
         (setq tmp (string< softwareVersion version))
         (if (not tmp)
-          ;;; softwareVersion is greater or equal/newer than given version
+          ;;; softwareVersion is bigger or equal/newer than given version
           ()
           ;;; softwareVersion is smaller/older than given version
           (progn
+            (setq softwareList (nconc softwareList (list x)))
             (mark-rel-inverse {depends on} x m2)
             (do-marked (y m2)
               (setq tmp2 (type-node? y))
