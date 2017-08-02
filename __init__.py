@@ -348,11 +348,11 @@ def main():
             print "Input the number of the vulnerability"
             user_input = raw_input()
             if not user_input.isdigit():
-                break
+                continue
             res = SCONE.get_software_vulnerability(int(user_input))
             if res == -1:
                 print "Invalid number of vulnerability"
-                break
+                continue
             else:
                 if res[1] is None:
                     print "Software %s has vulnerability" % res[0]
