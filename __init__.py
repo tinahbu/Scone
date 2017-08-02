@@ -376,17 +376,11 @@ def main():
                   "certificate, which allows man-in-the-middle attackers to spoof SSL servers via an arbitrary valid " \
                   "certificate. "
             print "Loading & checking..."
-            s1 = set(SCONE.check_vulnerability('task', 'httplib'))
-            s2 = set(SCONE.check_vulnerability('task', 'urllib'))
-            s3 = set(SCONE.check_vulnerability('task', 'urllib2'))
-            s4 = set(SCONE.check_vulnerability('task', 'xmlrpclib'))
-            s5 = set(SCONE.check_vulnerability('task', 'python', '1.9', 'newer'))
-            s6 = set(SCONE.check_vulnerability('task', 'python', '2.8', 'older'))
-            s7 = set(SCONE.check_vulnerability('task', 'python', '2.9', 'newer'))
-            s8 = set(SCONE.check_vulnerability('task', 'python', '3.5', 'older'))
+            res = SCONE.cve_check_1()
+            SCONE.add_cve(1)
             # union |, intersection &
             print "Those tasks are affected by rule CVE-2014-9365:"
-            print ', '.join((s1 | s2 | s3 | s4) & ((s5 & s6) | (s7 & s8)))
+            print ', '.join(res)
         elif user_input == 19:
             print "Input new vulnerability rule CVE-2015-6015 into our knowledge base ..."
             print "CONTENT: Unspecified vulnerability in the Oracle Outside In Technology component in Oracle Fusion " \
@@ -397,12 +391,11 @@ def main():
                   "Oracle Outside In 8.5.2 and earlier, which allows remote attackers to execute arbitrary code via a " \
                   "crafted Paradox DB file. "
             print "Loading & checking..."
-            s1 = set(SCONE.check_vulnerability('task', 'Oracle Outside In Technology'))
-            s2 = set(SCONE.check_vulnerability('task', 'Oracle Fusion Middleware', '8.4.9', 'newer'))
-            s3 = set(SCONE.check_vulnerability('task', 'Oracle Fusion Middleware', '8.5.3', 'older'))
+            res = SCONE.cve_check_2()
+            SCONE.add_cve(2)
             # union |, intersection &
             print "Those tasks are affected by rule CVE-2015-6015:"
-            print ', '.join(s1 & (s2 | s3))
+            print ', '.join(res)
         else:
             print "invalid input! Please try again"
             continue

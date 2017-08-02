@@ -13,6 +13,7 @@ ERROR_MESSAGE = '\nERROR'  # we disable debug mode and hook it to a special stin
 class Scone(object):
     def __init__(self):
         self.vulnerabilities = []   # remember all inputted vulnerabilities
+        self.cve = []
 
         self.lock = RLock()
         # redirect sbcl's output and input to PIPE, so we can send string to stdin and stdout, just like what we do in
@@ -206,7 +207,33 @@ class Scone(object):
                 # (new-statement {CNN for product recommendation} {requires software} (new-indv NIL {Python_3.0}))
                 scone_input = '(new-statement {%s} {requires software} (new-indv NIL {%s}) )' % (task_name, software)
                 self.communicate(scone_input)
-        return nonexisted_software_list
+        v = set()
+        if 1 in self.cve and task_name in self.cve_check_1():
+            v.add(1)
+        if 2 in self.cve and task_name in self.cve_check_2():
+            v.add(2)
+        return nonexisted_software_list, v
+
+    def add_cve(self, f):
+        self.cve += [f]
+
+    # for CVE check when adding software to user task
+    def cve_check_1(self):
+        s1 = set(self.check_vulnerability('task', 'httplib'))
+        s2 = set(self.check_vulnerability('task', 'urllib'))
+        s3 = set(self.check_vulnerability('task', 'urllib2'))
+        s4 = set(self.check_vulnerability('task', 'xmlrpclib'))
+        s5 = set(self.check_vulnerability('task', 'python', '1.9', 'newer'))
+        s6 = set(self.check_vulnerability('task', 'python', '2.8', 'older'))
+        s7 = set(self.check_vulnerability('task', 'python', '2.9', 'newer'))
+        s8 = set(self.check_vulnerability('task', 'python', '3.5', 'older'))
+        return (s1 | s2 | s3 | s4) & ((s5 & s6) | (s7 & s8))
+
+    def cve_check_2(self):
+        s1 = set(self.check_vulnerability('task', 'Oracle Outside In Technology'))
+        s2 = set(self.check_vulnerability('task', 'Oracle Fusion Middleware', '8.4.9', 'newer'))
+        s3 = set(self.check_vulnerability('task', 'Oracle Fusion Middleware', '8.5.3', 'older'))
+        return s1 & (s2 | s3)
 
     """
     Assign hardware to specific task
