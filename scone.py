@@ -448,7 +448,7 @@ class Scone(object):
             scone_input = '(%s_check_vulnerability {%s})' % (target, software_name)
             res = self.communicate(scone_input)
             if target in ['user', 'task']:
-                return list(set(res[:-1]))
+                return list(set(map(lambda x: x[1:-1], res[:-1])))
             return list(set(map(lambda x: ' '.join(re.split('\s|\{|\}', x)[1:-2]), res[:-1])))
         elif compare != 'equal' and compare != 'newer' and compare != 'older':
             return []
@@ -461,7 +461,7 @@ class Scone(object):
             scone_input = '(%s_check_vulnerability_%s {%s} "%s")' % (target, compare, software_name, version)
             res = self.communicate(scone_input)
             if target in ['user', 'task']:
-                return list(set(res[:-1]))
+                return list(set(map(lambda x: x[1:-1], res[:-1])))
             if compare == 'equal':
                 return list(set(map(lambda x: ' '.join(re.split('\s|\{|\}', x)[1:-2]), res[:-1]))) + [software_name + "_" + version]
             return list(set(map(lambda x: ' '.join(re.split('\s|\{|\}', x)[1:-2]), res[:-1])))
