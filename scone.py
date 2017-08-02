@@ -404,7 +404,7 @@ class Scone(object):
     return the vul at index as a [software_name, version, compare] list
     """
     def get_software_vulnerability(self, index):
-        if index < 0 or index > len(self.vulnerabilities):
+        if index < 0 or index >= len(self.vulnerabilities):
             return -1
         return self.vulnerabilities[index]
 
