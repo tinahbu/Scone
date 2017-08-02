@@ -50,12 +50,13 @@ def main():
         print "12: Check if some target has this vulnerability"
         print "13: Show details of added vulnerability in the KB"  # fake, stored in python engine
         print "14: Add demo CVE-2014-9365 into knowledge base"
+        print "15: Add demo CVE-2015-6015 into knowledge base"
         str_input = raw_input()
         if not str_input.isdigit():
             print "Invalid input! Please try again"
             continue
         user_input = int(str_input)
-        if user_input < 1 or user_input > 14:
+        if user_input < 1 or user_input > 15:
             print "Invalid input! Please try again"
             continue
         if user_input == 1:
@@ -297,6 +298,22 @@ def main():
             # union |, intersection &
             print "Those tasks are affected by rule CVE-2014-9365:"
             print ', '.join((s1 | s2 | s3 | s4) & ((s5 & s6) | (s7 & s8)))
+        elif user_input == 15:
+            print "Input new vulnerability rule CVE-2015-6015 into our knowledge base ..."
+            print "CONTENT: Unspecified vulnerability in the Oracle Outside In Technology component in Oracle Fusion " \
+                  "Middleware 8.5.0, 8.5.1, and 8.5.2 allows local users to affect availability via unknown vectors " \
+                  "related to Outside In Filters, a different vulnerability than CVE-2015-4808, CVE-2015-6013, " \
+                  "CVE-2015-6014, and CVE-2016-0432. NOTE: the previous information is from the January 2016 CPU. " \
+                  "Oracle has not commented on third-party claims that this issue is a stack-based buffer overflow in " \
+                  "Oracle Outside In 8.5.2 and earlier, which allows remote attackers to execute arbitrary code via a " \
+                  "crafted Paradox DB file. "
+            print "Loading & checking..."
+            s1 = set(SCONE.check_vulnerability('task', 'Oracle Outside In Technology'))
+            s2 = set(SCONE.check_vulnerability('task', 'Oracle Fusion Middleware', '8.4.9', 'newer'))
+            s3 = set(SCONE.check_vulnerability('task', 'Oracle Fusion Middleware', '8.5.3', 'older'))
+            # union |, intersection &
+            print "Those tasks are affected by rule CVE-2015-6015:"
+            print ', '.join(s1 & (s2 | s3))
         else:
             print "invalid input! Please try again"
             continue
