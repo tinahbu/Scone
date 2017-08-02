@@ -418,7 +418,7 @@ class Scone(object):
         for i, [software_name, version, compare] in enumerate(self.vulnerabilities):
             res = self.check_vulnerability(target, software_name, version, compare)
             # print res, target, software_name, version, compare
-            if res != - 1 and (item in res):
+            if res != [] and (item in res):
                 r += [i]
         return r
 
@@ -438,12 +438,12 @@ class Scone(object):
     """
     def check_vulnerability(self, target, software_name, version=None, compare=None):
         if target != 'user' and target != 'task' and target != 'software':
-            return -1
+            return []
         if version is None:
-            scone_input = "(type-node? {%s})" % software_name
-            res = self.communicate(scone_input)
-            if res[0] != 'T':
-                return -1
+            # scone_input = "(type-node? {%s})" % software_name
+            # res = self.communicate(scone_input)
+            # if res[0] != 'T':
+            #     return -1
             # (user_check_vulnerability {OpenSSL})
             scone_input = '(%s_check_vulnerability {%s})' % (target, software_name)
             res = self.communicate(scone_input)
@@ -451,13 +451,13 @@ class Scone(object):
                 return list(set(res[:-1]))
             return list(set(map(lambda x: ' '.join(re.split('\s|\{|\}', x)[1:-2]), res[:-1])))
         elif compare != 'equal' and compare != 'newer' and compare != 'older':
-            return -1
+            return []
         else:
             # (user_check_vulnerability_newer {python} "2.7")
-            scone_input = "(type-node? {%s})" % (software_name + "_" + version)
-            res = self.communicate(scone_input)
-            if res[0] != 'T':
-                return -1
+            # scone_input = "(type-node? {%s})" % (software_name + "_" + version)
+            # res = self.communicate(scone_input)
+            # if res[0] != 'T':
+            #     return []
             scone_input = '(%s_check_vulnerability_%s {%s} "%s")' % (target, compare, software_name, version)
             res = self.communicate(scone_input)
             if target in ['user', 'task']:
