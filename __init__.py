@@ -52,7 +52,7 @@ def main():
         print '    User:'
         print '        10. Create a new user'
         print "        11. Create a new user group"
-        print "        12. Authorize user group to use an existed software"
+        print "        12. Authorize a user or a user group to use an existed software"
         print "        13. Assign user to existed groups"
         print 'Query:'
         print "        14. Check if user can execute this software"
@@ -94,7 +94,7 @@ def main():
             # Set a existed software's dependencies
             print "Please enter the software name:"
             software_name = raw_input()
-            print "Please enter the list of existed software that is depended by above software (ends with single return):"
+            print "Please enter the list of dependencies of the software (end with single return):"
             software_list = []
             while True:
                 new_existed_software = raw_input()
@@ -182,7 +182,7 @@ def main():
             # user_task_requires_software
             print "Please enter the existed task name:"
             task_name = raw_input()
-            print "Please enter the list of software that is needed by this task (ends with single return):"
+            print "Please enter the name of softwares that are needed by this task (separated by a single return, double return to finish):"
             software_list = []
             while True:
                 software_name = raw_input()
@@ -239,21 +239,19 @@ def main():
             # create_user
             print "Please enter a new user name:"
             new_user_name = raw_input()
-            print "Please enter a user id:"
+            print "Please enter the user id:"
             user_id = raw_input()
-            print "Please enter a user email:"
+            print "Please enter the user email:"
             user_email = raw_input()
-            print "Please assign a user group:"
+            print "Please assign the user group:"
             group_name = raw_input()
-            print "Please enter an existed operating system:"
-            os_name = raw_input()
-            print "Please enter an existed processor:"
+            print "Please enter the user's processor:"
             processor_name = raw_input()
             res = SCONE.create_user(new_user_name, user_id, user_email, os_name, processor_name, group_name)
             if res == 1:
                 print "User already exists"
             elif res == 0:
-                print "User create succeeds"
+                print "User create succeeded"
             elif res == -2:
                 print "operating system does not exist"
             elif res == 3:
@@ -271,9 +269,9 @@ def main():
                 print "Group create succeeds"
         elif user_input == 12:
             # user_group_is_authorized_to_exec
-            print "Please enter the intended user group's name:"
+            print "Please enter the name of the user or user group:"
             group_name = raw_input()
-            print "Please enter the list of software that authorizes user group to execute (ends with single return):"
+            print "Please enter the list of software that authorizes the above user or user group to execute (end with single return):"
             software_list = []
             while True:
                 software_name = raw_input()
@@ -289,7 +287,7 @@ def main():
             # assign_user_to_groups
             print "Please enter intended user's name:"
             user_name = raw_input()
-            print "Please enter the list of target groups (ends with return):"
+            print "Please enter the list of target groups (end with return):"
             group_list = []
             while True:
                 group_name = raw_input()
