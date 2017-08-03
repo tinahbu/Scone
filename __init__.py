@@ -88,7 +88,8 @@ def main():
                 for r in res:
                     print r[0]
                     if r[1]:
-                        print "ALERT: See vulnerability #" + ', '.join(map(str, r[1])) + ' for why the above newly added software has vulnerability'
+                        print "ALERT: See vulnerability #" + ', '.join(
+                            map(str, r[1])) + ' for why the above newly added software has vulnerability'
         elif user_input == 2:
             # Set a existed software's dependencies
             print "Please enter the software name:"
@@ -191,11 +192,28 @@ def main():
             res = SCONE.user_task_requires_software(task_name, software_list)
             if res == -1:
                 print "Task does not exist yet"
-            elif len(res) > 0:
+            elif len(res[0]) > 0:
                 print "Those software do not exist now:"
-                print " ,".join(res)
+                print " ,".join(res[0])
             else:
                 print "Requirements are added successfully"
+            if 1 in res[1]:
+                print "ALARM [CVE-2014-9365]: This task has vulnerability"
+                print "The HTTP clients in the (1) httplib, (2) urllib, (3) urllib2, and (4) xmlrpclib libraries in " \
+                      "CPython (aka Python) 2.x before 2.7.9 and 3.x before 3.4.3, when accessing an HTTPS URL, " \
+                      "do not (a) check the certificate against a trust store or verify that the server hostname " \
+                      "matches a domain name in the subject's (b) Common Name or (c) subjectAltName field of the " \
+                      "X.509 certificate, which allows man-in-the-middle attackers to spoof SSL servers via an " \
+                      "arbitrary valid certificate. "
+            if 2 in res[1]:
+                print "ALARM [CVE-2015-6015]: This task has vulnerability"
+                print "Unspecified vulnerability in the Oracle Outside In Technology component in Oracle Fusion " \
+                      "Middleware 8.5.0, 8.5.1, and 8.5.2 allows local users to affect availability via unknown " \
+                      "vectors related to Outside In Filters, a different vulnerability than CVE-2015-4808, " \
+                      "CVE-2015-6013, CVE-2015-6014, and CVE-2016-0432. NOTE: the previous information is from the " \
+                      "January 2016 CPU. Oracle has not commented on third-party claims that this issue is a " \
+                      "stack-based buffer overflow in Oracle Outside In 8.5.2 and earlier, which allows remote " \
+                      "attackers to execute arbitrary code via a crafted Paradox DB file. "
         elif user_input == 9:
             # user_task_performed_by
             print "Please enter the name of user who wants to perform a task:"
@@ -401,6 +419,7 @@ def main():
             continue
         print "Please enter to continue"
         raw_input()
+
 
 if __name__ == "__main__":
     main()
