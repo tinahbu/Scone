@@ -307,7 +307,7 @@ class Scone(object):
             self.communicate(scone_input)
             return tmp, 0
         else:
-            return tmp, res
+            return tmp, map(lambda x: x[1:-1].split()[0], res)
 
     """
     Create a {is authorized to execute} relation between user group and list of softwares
