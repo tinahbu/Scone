@@ -31,7 +31,7 @@ def main():
     sleep(5)  # wait enough time to make sure scone service is registered
     Process(target=run_state_modifier).start()
     Process(target=run_state_inquirer).start()
-    sleep(10)
+    sleep(2)
     print "begin terminal"
     SCONE = Pyro4.Proxy('PYRONAME:scone')
     while True:
@@ -223,18 +223,21 @@ def main():
             res = SCONE.user_task_performed_by(task_name, user_name)
             # print res
             if res == 0:
-                print "Succeeds"
+                print "Succeeded"
             elif res == -1:
                 print "Task does not exist"
             elif res == -2:
                 print "User does not exist"
-            elif res == -3:
+            if res[1] == 0:
+                print "Succeeded"
+            if res[0] == -3:
                 print "User has no required CPU"
-            elif res == -4:
+            if res[0] == -4:
                 print "User has no required GPU"
-            elif len(res) != 0:
+            if len(res[1]) != 0:
                 print "User has to first gain those software's authorities to perform this task: "
-                print ", ".join(res[:-1])
+                print ", ".join(res[1][:-1])
+
         elif user_input == 10:
             # create_user
             print "Please enter a new user name:"
@@ -247,13 +250,13 @@ def main():
             group_name = raw_input()
             print "Please enter the user's processor:"
             processor_name = raw_input()
-            res = SCONE.create_user(new_user_name, user_id, user_email, os_name, processor_name, group_name)
+            res = SCONE.create_user(new_user_name, user_id, user_email, processor_name, group_name)
             if res == 1:
                 print "User already exists"
             elif res == 0:
                 print "User create succeeded"
-            elif res == -2:
-                print "operating system does not exist"
+            # elif res == -2:
+            #     print "operating system does not exist"
             elif res == 3:
                 print "processor does not exist"
             else:

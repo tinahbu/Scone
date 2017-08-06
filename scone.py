@@ -283,17 +283,18 @@ class Scone(object):
         if res[0] != 'T':
             return -2
 
+        tmp = 0
         scone_input = '(task_check_user_CPU {%s} {%s})' \
                       % (user_name, task_name)
         res = self.communicate(scone_input)
         if res is None or res[0] == "NIL":
-            return -3
+            tmp = -3
 
         scone_input = '(task_check_user_GPU {%s} {%s})' \
                       % (user_name, task_name)
         res = self.communicate(scone_input)
         if res is None or res[0] == "NIL":
-            return -4
+            tmp = -4
 
         # access_check (user task)
         scone_input = '(access_check {%s} {%s})' % (user_name, task_name)
@@ -304,9 +305,9 @@ class Scone(object):
         if len(res) == 1:
             scone_input = "(new-statement {%s} {is performing} {%s})" % (user_name, task_name)
             self.communicate(scone_input)
-            return 0
+            return tmp, 0
         else:
-            return res
+            return tmp, res
 
     """
     Create a {is authorized to execute} relation between user group and list of softwares
@@ -365,7 +366,7 @@ class Scone(object):
            0,  if create successfully
     """
     def create_user(self, user_name, user_id, user_email,
-                    user_os_full_name, user_processor_full_name,
+                    user_processor_full_name,
                     group_name="default user",):
         scone_input = "(indv-node? {%s})" % user_name
         res = self.communicate(scone_input)
@@ -374,10 +375,10 @@ class Scone(object):
         if res[0] != "NIL":
             return 1
 
-        scone_input = "(type-node? {%s})" % user_os_full_name
-        res = self.communicate(scone_input)
-        if res is None or res[0] == "NIL":
-            return -2
+        # scone_input = "(type-node? {%s})" % user_os_full_name
+        # res = self.communicate(scone_input)
+        # if res is None or res[0] == "NIL":
+        #     return -2
 
         scone_input = "(type-node? {%s})" % user_processor_full_name
         res = self.communicate(scone_input)
@@ -389,7 +390,7 @@ class Scone(object):
                         "(x-is-the-y-of-z (new-string {\"{%s}\"}) {username of user} {%s})" % (user_name, user_name),
                         "(x-is-the-y-of-z (new-string {\"{%s}\"}) {email of user} {%s})" % (user_email, user_name),
                         "(x-is-the-y-of-z (new-string {\"{%s}\"}) {userid of user} {%s})" % (user_id, user_name),
-                        "(x-is-the-y-of-z (new-indv NIL {%s}) {os of user} {%s})" % (user_os_full_name, user_name),
+                        # "(x-is-the-y-of-z (new-indv NIL {%s}) {os of user} {%s})" % (user_os_full_name, user_name),
                         "(x-is-the-y-of-z (new-indv NIL {%s}) {processor of user} {%s})" % (user_processor_full_name, user_name),
                         "(x-is-a-y-of-z {%s} {member of user} {%s})" % (user_name, group_name)]
         for i, scone_input in enumerate(scone_inputs):

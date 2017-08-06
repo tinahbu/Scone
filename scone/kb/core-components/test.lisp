@@ -58,8 +58,8 @@
 (new-statement {Shopping cart development} {requires software} (new-indv NIL {tornado}))
 (new-statement {Shopping cart development} {requires software} (new-indv NIL {Laravel}))
 (new-statement {Shopping cart development} {requires software} (new-indv NIL {Node.js}))
-(new-statement {Shopping cart development} {requires software} (new-indv NIL {Oracle Outside In Technology}))
-(new-statement {Shopping cart development} {requires software} (new-indv NIL {Oracle Fusion Middleware_8.5.1}))
+;(new-statement {Shopping cart development} {requires software} (new-indv NIL {Oracle Outside In Technology}))
+;(new-statement {Shopping cart development} {requires software} (new-indv NIL {Oracle Fusion Middleware_8.5.1}))
 (new-statement {Apache server configure} {requires software} (new-indv NIL {Apache}))
 (new-statement {VR Game Development} {requires processor} (new-indv NIL {Nvidia GeForce GTX_1060}))
 (new-statement {VR Game Development} {requires processor} (new-indv NIL {Intel Core CPU_i5}))
@@ -80,7 +80,7 @@
 (new-statement {python} {depends on} {urllib})
 (new-statement {python} {depends on} {urllib2})
 (new-statement {python} {depends on} {xmlrpclib})
-(new-statement {Oracle Outside In Technology} {depends on} {Oracle Fusion Middleware})
+;(new-statement {Oracle Outside In Technology} {depends on} {Oracle Fusion Middleware})
 
 
 
