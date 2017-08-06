@@ -432,7 +432,9 @@ def main():
             SCONE.add_cve(2)
             # union |, intersection &
             print "Those tasks are affected by rule CVE-2015-6015:"
-            print ', '.join(res)
+            print ', '.join(res[0])
+            print "Those users are affected by rule CVE-2015-6015:"
+            print ', '.join(res[1])
         else:
             print "invalid input! Please try again"
             continue

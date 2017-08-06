@@ -209,8 +209,8 @@ class Scone(object):
         v = set()
         if 1 in self.cve and task_name in self.cve_check_1():
             v.add(1)
-        if 2 in self.cve and task_name in self.cve_check_2():
-            v.add(2)
+        # if 2 in self.cve and task_name in self.cve_check_2():
+        #     v.add(2)
         return nonexisted_software_list, v
 
     def add_cve(self, f):
@@ -232,7 +232,11 @@ class Scone(object):
         s1 = set(self.check_vulnerability('task', 'Oracle Outside In Technology'))
         s2 = set(self.check_vulnerability('task', 'Oracle Fusion Middleware', '8.4.9', 'newer'))
         s3 = set(self.check_vulnerability('task', 'Oracle Fusion Middleware', '8.5.3', 'older'))
-        return s1 & (s2 | s3)
+
+        s11 = set(self.check_vulnerability('user', 'Oracle Outside In Technology'))
+        s22 = set(self.check_vulnerability('user', 'Oracle Fusion Middleware', '8.4.9', 'newer'))
+        s33 = set(self.check_vulnerability('user', 'Oracle Fusion Middleware', '8.5.3', 'older'))
+        return s1 & (s2 | s3), s11 & (s22 | s33)
 
     """
     Assign hardware to specific task
