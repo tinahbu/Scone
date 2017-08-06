@@ -9,6 +9,18 @@ from scone import Scone
 import os
 
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+# print bcolors.WARNING + "Warning: No active frommets remain. Continue?" + bcolors.ENDC
+
 def run_scone():
     Scone().run()  # run scone service
 
@@ -198,27 +210,27 @@ def main():
             else:
                 print "Requirements are added successfully"
             if 1 in res[1]:
-                print "ALARM [CVE-2014-9365]"
+                print bcolors.HEADER + "ALARM [CVE-2014-9365]" + bcolors.ENDC
                 print "Resources This Task Uses Matched a Known Vulnerability."
                 print "See Vulnerability Details below: "
-                print "The HTTP clients in the (1) httplib, (2) urllib, (3) urllib2, and (4) xmlrpclib libraries in " \
+                print bcolors.OKGREEN + "The HTTP clients in the (1) httplib, (2) urllib, (3) urllib2, and (4) xmlrpclib libraries in " \
                       "CPython (aka Python) 2.x before 2.7.9 and 3.x before 3.4.3, when accessing an HTTPS URL, " \
                       "do not (a) check the certificate against a trust store or verify that the server hostname " \
                       "matches a domain name in the subject's (b) Common Name or (c) subjectAltName field of the " \
                       "X.509 certificate, which allows man-in-the-middle attackers to spoof SSL servers via an " \
-                      "arbitrary valid certificate. "
+                      "arbitrary valid certificate. " + bcolors.ENDC
                 print "Check this vulnerability online at http://www.cvedetails.com/cve/CVE-2015-6015/"
             if 2 in res[1]:
-                print "ALARM [CVE-2015-6015]"
+                print bcolors.HEADER + "ALARM [CVE-2015-6015]" + bcolors.ENDC
                 print "Resources This Task Uses Matched a Known Vulnerability."
                 print "See Vulnerability Details below: "
-                print "Unspecified vulnerability in the Oracle Outside In Technology component in Oracle Fusion " \
+                print bcolors.OKGREEN + "Unspecified vulnerability in the Oracle Outside In Technology component in Oracle Fusion " \
                       "Middleware 8.5.0, 8.5.1, and 8.5.2 allows local users to affect availability via unknown " \
                       "vectors related to Outside In Filters, a different vulnerability than CVE-2015-4808, " \
                       "CVE-2015-6013, CVE-2015-6014, and CVE-2016-0432. NOTE: the previous information is from the " \
                       "January 2016 CPU. Oracle has not commented on third-party claims that this issue is a " \
                       "stack-based buffer overflow in Oracle Outside In 8.5.2 and earlier, which allows remote " \
-                      "attackers to execute arbitrary code via a crafted Paradox DB file. "
+                      "attackers to execute arbitrary code via a crafted Paradox DB file. " + bcolors.ENDC
                 print "Check this vulnerability online at https://www.cvedetails.com/cve/CVE-2014-9365/"
 
         elif user_input == 9:
@@ -395,12 +407,12 @@ def main():
                     print "Software %s with version %s %s has vulnerability" % (res[0], res[2], res[1])
         elif user_input == 18:
             print "Input new vulnerability rule CVE-2014-9365 into our knowledge base ..."
-            print "CONTENT: The HTTP clients in the (1) httplib, (2) urllib, (3) urllib2, and (4) xmlrpclib libraries " \
+            print bcolors.OKGREEN + "CONTENT: The HTTP clients in the (1) httplib, (2) urllib, (3) urllib2, and (4) xmlrpclib libraries " \
                   "in CPython (aka Python) 2.x before 2.7.9 and 3.x before 3.4.3, when accessing an HTTPS URL, " \
                   "do not (a) check the certificate against a trust store or verify that the server hostname matches " \
                   "a domain name in the subject's (b) Common Name or (c) subjectAltName field of the X.509 " \
                   "certificate, which allows man-in-the-middle attackers to spoof SSL servers via an arbitrary valid " \
-                  "certificate. "
+                  "certificate. " + bcolors.ENDC
             print "Loading & checking..."
             res = SCONE.cve_check_1()
             SCONE.add_cve(1)
@@ -409,13 +421,13 @@ def main():
             print ', '.join(res)
         elif user_input == 19:
             print "Input new vulnerability rule CVE-2015-6015 into our knowledge base ..."
-            print "CONTENT: Unspecified vulnerability in the Oracle Outside In Technology component in Oracle Fusion " \
+            print bcolors.OKGREEN + "CONTENT: Unspecified vulnerability in the Oracle Outside In Technology component in Oracle Fusion " \
                   "Middleware 8.5.0, 8.5.1, and 8.5.2 allows local users to affect availability via unknown vectors " \
                   "related to Outside In Filters, a different vulnerability than CVE-2015-4808, CVE-2015-6013, " \
                   "CVE-2015-6014, and CVE-2016-0432. NOTE: the previous information is from the January 2016 CPU. " \
                   "Oracle has not commented on third-party claims that this issue is a stack-based buffer overflow in " \
                   "Oracle Outside In 8.5.2 and earlier, which allows remote attackers to execute arbitrary code via a " \
-                  "crafted Paradox DB file. "
+                  "crafted Paradox DB file. " + bcolors.ENDC
             print "Loading & checking..."
             res = SCONE.cve_check_2()
             SCONE.add_cve(2)
