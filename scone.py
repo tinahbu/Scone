@@ -8,12 +8,11 @@ import re
 
 ERROR_MESSAGE = '\nERROR'  # we disable debug mode and hook it to a special sting
 
-
 @Pyro4.expose
 class Scone(object):
     def __init__(self):
         self.vulnerabilities = []   # remember all inputted vulnerabilities
-        self.cve = []
+        self.cve = [1]
 
         self.lock = RLock()
         # redirect sbcl's output and input to PIPE, so we can send string to stdin and stdout, just like what we do in
@@ -210,8 +209,8 @@ class Scone(object):
         v = set()
         if 1 in self.cve and task_name in self.cve_check_1():
             v.add(1)
-        if 2 in self.cve and task_name in self.cve_check_2():
-            v.add(2)
+        # if 2 in self.cve and task_name in self.cve_check_2():
+        #     v.add(2)
         return nonexisted_software_list, v
 
     def add_cve(self, f):
@@ -233,7 +232,11 @@ class Scone(object):
         s1 = set(self.check_vulnerability('task', 'Oracle Outside In Technology'))
         s2 = set(self.check_vulnerability('task', 'Oracle Fusion Middleware', '8.4.9', 'newer'))
         s3 = set(self.check_vulnerability('task', 'Oracle Fusion Middleware', '8.5.3', 'older'))
-        return s1 & (s2 | s3)
+
+        s11 = set(self.check_vulnerability('user', 'Oracle Outside In Technology'))
+        s22 = set(self.check_vulnerability('user', 'Oracle Fusion Middleware', '8.4.9', 'newer'))
+        s33 = set(self.check_vulnerability('user', 'Oracle Fusion Middleware', '8.5.3', 'older'))
+        return s1 & (s2 | s3), s11 & (s22 | s33)
 
     """
     Assign hardware to specific task
@@ -272,17 +275,18 @@ class Scone(object):
         if res[0] != 'T':
             return -2
 
+        tmp = 0
         scone_input = '(task_check_user_CPU {%s} {%s})' \
                       % (user_name, task_name)
         res = self.communicate(scone_input)
         if res is None or res[0] == "NIL":
-            return -3
+            tmp = -3
 
         scone_input = '(task_check_user_GPU {%s} {%s})' \
                       % (user_name, task_name)
         res = self.communicate(scone_input)
         if res is None or res[0] == "NIL":
-            return -4
+            tmp = -4
 
         # access_check (user task)
         scone_input = '(access_check {%s} {%s})' % (user_name, task_name)
@@ -293,9 +297,9 @@ class Scone(object):
         if len(res) == 1:
             scone_input = "(new-statement {%s} {is performing} {%s})" % (user_name, task_name)
             self.communicate(scone_input)
-            return 0
+            return tmp, 0
         else:
-            return res
+            return tmp, map(lambda x: x[1:-1].split()[0], res)
 
     """
     Create a {is authorized to execute} relation between user group and list of softwares
@@ -354,7 +358,7 @@ class Scone(object):
            0,  if create successfully
     """
     def create_user(self, user_name, user_id, user_email,
-                    user_os_full_name, user_processor_full_name,
+                    user_processor_full_name,
                     group_name="default user",):
         scone_input = "(indv-node? {%s})" % user_name
         res = self.communicate(scone_input)
@@ -364,10 +368,10 @@ class Scone(object):
         if res[0] != "NIL":
             return 1
 
-        scone_input = "(type-node? {%s})" % user_os_full_name
-        res = self.communicate(scone_input)
-        if res is None or res[0] == "NIL":
-            return -2
+        # scone_input = "(type-node? {%s})" % user_os_full_name
+        # res = self.communicate(scone_input)
+        # if res is None or res[0] == "NIL":
+        #     return -2
 
         scone_input = "(type-node? {%s})" % user_processor_full_name
         res = self.communicate(scone_input)
@@ -379,7 +383,7 @@ class Scone(object):
                         "(x-is-the-y-of-z (new-string {\"{%s}\"}) {username of user} {%s})" % (user_name, user_name),
                         "(x-is-the-y-of-z (new-string {\"{%s}\"}) {email of user} {%s})" % (user_email, user_name),
                         "(x-is-the-y-of-z (new-string {\"{%s}\"}) {userid of user} {%s})" % (user_id, user_name),
-                        "(x-is-the-y-of-z (new-indv NIL {%s}) {os of user} {%s})" % (user_os_full_name, user_name),
+                        # "(x-is-the-y-of-z (new-indv NIL {%s}) {os of user} {%s})" % (user_os_full_name, user_name),
                         "(x-is-the-y-of-z (new-indv NIL {%s}) {processor of user} {%s})" % (user_processor_full_name, user_name),
                         "(x-is-a-y-of-z {%s} {member of user} {%s})" % (user_name, group_name)]
         for i, scone_input in enumerate(scone_inputs):

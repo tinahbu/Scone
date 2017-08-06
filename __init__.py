@@ -9,6 +9,18 @@ from scone import Scone
 import os
 
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[91m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+# print bcolors.WARNING + "Warning: No active frommets remain. Continue?" + bcolors.ENDC
+
 def run_scone():
     Scone().run()  # run scone service
 
@@ -31,7 +43,7 @@ def main():
     sleep(5)  # wait enough time to make sure scone service is registered
     Process(target=run_state_modifier).start()
     Process(target=run_state_inquirer).start()
-    sleep(10)
+    sleep(2)
     print "begin terminal"
     SCONE = Pyro4.Proxy('PYRONAME:scone')
     while True:
@@ -44,29 +56,28 @@ def main():
         print '    Hardware:'
         print '        4. Create a new CPU or GPU'
         print "        5. Create a new OS"
-        print "        6. Set the processor requirements of an existed task"
+        print "        6. Set the processor requirements of a task"
         print '    Task:'
         print '        7. Create a new task'
-        print "        8. Set the software requirements of a existed task"
+        print "        8. Set the software requirements of a task"
         print "        9. Let a user perform an existed task"
         print '    User:'
         print '        10. Create a new user'
         print "        11. Create a new user group"
-        print "        12. Authorize user group to use an existed software"
+        print "        12. Authorize a user or a user group to use a software"
         print "        13. Assign user to existed groups"
         print 'Query:'
         print "        14. Check if user can execute this software"
         print "        15. Check if some target has this vulnerability"
         print "        16. Check if user have enough hardware resources to perform the task"
         print "        17. Show details of added vulnerability in the KB"
-        print "        18. Add demo CVE-2014-9365 into knowledge base"
-        print "        19. Add demo CVE-2015-6015 into knowledge base"
+        print "        18. Add new vulnerability CVE-2015-6015"
         str_input = raw_input()
         if not str_input.isdigit():
             print "Invalid input! Please try again"
             continue
         user_input = int(str_input)
-        if user_input < 1 or user_input > 20:
+        if user_input < 1 or user_input > 19:
             print "Invalid input! Please try again"
             continue
         if user_input == 1:
@@ -94,7 +105,7 @@ def main():
             # Set a existed software's dependencies
             print "Please enter the software name:"
             software_name = raw_input()
-            print "Please enter the list of existed software that is depended by above software (ends with single return):"
+            print "Please enter the list of dependencies of the software (end with single return):"
             software_list = []
             while True:
                 new_existed_software = raw_input()
@@ -165,11 +176,11 @@ def main():
             processor_name = raw_input()
             ret = SCONE.user_task_requires_hardware(task_name, processor_name)
             if ret == 0:
-                print "Requires successfully"
+                print "Hardware Requirement set successfully"
             elif ret == -1:
                 print "Task does not exist"
             elif ret == -2:
-                print "processor does not exist"
+                print "Processor does not exist"
         elif user_input == 7:
             print "Please enter the new task name:"
             new_task_name = raw_input()
@@ -177,12 +188,12 @@ def main():
             if res == -1:
                 print "This task already exists"
             else:
-                print "task created successfully"
+                print "Task created successfully"
         elif user_input == 8:
             # user_task_requires_software
             print "Please enter the existed task name:"
             task_name = raw_input()
-            print "Please enter the list of software that is needed by this task (ends with single return):"
+            print "Please enter the name of softwares that are needed by this task (separated by a single return, double return to finish):"
             software_list = []
             while True:
                 software_name = raw_input()
@@ -198,22 +209,29 @@ def main():
             else:
                 print "Requirements are added successfully"
             if 1 in res[1]:
-                print "ALARM [CVE-2014-9365]: This task has vulnerability"
-                print "The HTTP clients in the (1) httplib, (2) urllib, (3) urllib2, and (4) xmlrpclib libraries in " \
+                print bcolors.HEADER + "ALARM [CVE-2014-9365]" + bcolors.ENDC
+                print "Resources This Task Uses Matched a Known Vulnerability."
+                print "See Vulnerability Details below: "
+                print bcolors.OKBLUE + "The HTTP clients in the (1) httplib, (2) urllib, (3) urllib2, and (4) xmlrpclib libraries in " \
                       "CPython (aka Python) 2.x before 2.7.9 and 3.x before 3.4.3, when accessing an HTTPS URL, " \
                       "do not (a) check the certificate against a trust store or verify that the server hostname " \
                       "matches a domain name in the subject's (b) Common Name or (c) subjectAltName field of the " \
                       "X.509 certificate, which allows man-in-the-middle attackers to spoof SSL servers via an " \
-                      "arbitrary valid certificate. "
+                      "arbitrary valid certificate. " + bcolors.ENDC
+                print "Check this vulnerability online at http://www.cvedetails.com/cve/CVE-2015-6015/"
             if 2 in res[1]:
-                print "ALARM [CVE-2015-6015]: This task has vulnerability"
-                print "Unspecified vulnerability in the Oracle Outside In Technology component in Oracle Fusion " \
+                print bcolors.HEADER + "ALARM [CVE-2015-6015]" + bcolors.ENDC
+                print "Resources This Task Uses Matched a Known Vulnerability."
+                print "See Vulnerability Details below: "
+                print bcolors.OKBLUE + "Unspecified vulnerability in the Oracle Outside In Technology component in Oracle Fusion " \
                       "Middleware 8.5.0, 8.5.1, and 8.5.2 allows local users to affect availability via unknown " \
                       "vectors related to Outside In Filters, a different vulnerability than CVE-2015-4808, " \
                       "CVE-2015-6013, CVE-2015-6014, and CVE-2016-0432. NOTE: the previous information is from the " \
                       "January 2016 CPU. Oracle has not commented on third-party claims that this issue is a " \
                       "stack-based buffer overflow in Oracle Outside In 8.5.2 and earlier, which allows remote " \
-                      "attackers to execute arbitrary code via a crafted Paradox DB file. "
+                      "attackers to execute arbitrary code via a crafted Paradox DB file. " + bcolors.ENDC
+                print "Check this vulnerability online at https://www.cvedetails.com/cve/CVE-2014-9365/"
+
         elif user_input == 9:
             # user_task_performed_by
             print "Please enter the name of user who wants to perform a task:"
@@ -223,39 +241,40 @@ def main():
             res = SCONE.user_task_performed_by(task_name, user_name)
             # print res
             if res == 0:
-                print "Succeeds"
+                print "Succeeded"
             elif res == -1:
                 print "Task does not exist"
             elif res == -2:
                 print "User does not exist"
-            elif res == -3:
+            if res[1] == 0:
+                print "Succeeded"
+            if res[0] == -3:
                 print "User has no required CPU"
-            elif res == -4:
+            if res[0] == -4:
                 print "User has no required GPU"
-            elif len(res) != 0:
+            if len(res[1]) != 0:
                 print "User has to first gain those software's authorities to perform this task: "
-                print ", ".join(res[:-1])
+                print ", ".join(res[1][:-1])
+
         elif user_input == 10:
             # create_user
             print "Please enter a new user name:"
             new_user_name = raw_input()
-            print "Please enter a user id:"
+            print "Please enter the user id:"
             user_id = raw_input()
-            print "Please enter a user email:"
+            print "Please enter the user email:"
             user_email = raw_input()
-            print "Please assign a user group:"
+            print "Please assign the user group:"
             group_name = raw_input()
-            print "Please enter an existed operating system:"
-            os_name = raw_input()
-            print "Please enter an existed processor:"
+            print "Please enter the user's processor:"
             processor_name = raw_input()
-            res = SCONE.create_user(new_user_name, user_id, user_email, os_name, processor_name, group_name)
+            res = SCONE.create_user(new_user_name, user_id, user_email, processor_name, group_name)
             if res == 1:
                 print "User already exists"
             elif res == 0:
-                print "User create succeeds"
-            elif res == -2:
-                print "operating system does not exist"
+                print "User create succeeded"
+            # elif res == -2:
+            #     print "operating system does not exist"
             elif res == 3:
                 print "processor does not exist"
             else:
@@ -271,9 +290,9 @@ def main():
                 print "Group create succeeds"
         elif user_input == 12:
             # user_group_is_authorized_to_exec
-            print "Please enter the intended user group's name:"
+            print "Please enter the name of the user or user group:"
             group_name = raw_input()
-            print "Please enter the list of software that authorizes user group to execute (ends with single return):"
+            print "Please enter the list of software that authorizes the above user or user group to execute (end with single return):"
             software_list = []
             while True:
                 software_name = raw_input()
@@ -289,7 +308,7 @@ def main():
             # assign_user_to_groups
             print "Please enter intended user's name:"
             user_name = raw_input()
-            print "Please enter the list of target groups (ends with return):"
+            print "Please enter the list of target groups (end with return):"
             group_list = []
             while True:
                 group_name = raw_input()
@@ -385,35 +404,37 @@ def main():
                     print "Software %s has vulnerability" % res[0]
                 else:
                     print "Software %s with version %s %s has vulnerability" % (res[0], res[2], res[1])
+        # elif user_input == 18:
+        #     print "Input new vulnerability rule CVE-2014-9365 into our knowledge base ..."
+        #     print bcolors.OKGREEN + "CONTENT: The HTTP clients in the (1) httplib, (2) urllib, (3) urllib2, and (4) xmlrpclib libraries " \
+        #           "in CPython (aka Python) 2.x before 2.7.9 and 3.x before 3.4.3, when accessing an HTTPS URL, " \
+        #           "do not (a) check the certificate against a trust store or verify that the server hostname matches " \
+        #           "a domain name in the subject's (b) Common Name or (c) subjectAltName field of the X.509 " \
+        #           "certificate, which allows man-in-the-middle attackers to spoof SSL servers via an arbitrary valid " \
+        #           "certificate. " + bcolors.ENDC
+        #     print "Loading & checking..."
+        #     res = SCONE.cve_check_1()
+        #     SCONE.add_cve(1)
+        #     # union |, intersection &
+        #     print "Those tasks are affected by rule CVE-2014-9365:"
+        #     print ', '.join(res)
         elif user_input == 18:
-            print "Input new vulnerability rule CVE-2014-9365 into our knowledge base ..."
-            print "CONTENT: The HTTP clients in the (1) httplib, (2) urllib, (3) urllib2, and (4) xmlrpclib libraries " \
-                  "in CPython (aka Python) 2.x before 2.7.9 and 3.x before 3.4.3, when accessing an HTTPS URL, " \
-                  "do not (a) check the certificate against a trust store or verify that the server hostname matches " \
-                  "a domain name in the subject's (b) Common Name or (c) subjectAltName field of the X.509 " \
-                  "certificate, which allows man-in-the-middle attackers to spoof SSL servers via an arbitrary valid " \
-                  "certificate. "
-            print "Loading & checking..."
-            res = SCONE.cve_check_1()
-            SCONE.add_cve(1)
-            # union |, intersection &
-            print "Those tasks are affected by rule CVE-2014-9365:"
-            print ', '.join(res)
-        elif user_input == 19:
             print "Input new vulnerability rule CVE-2015-6015 into our knowledge base ..."
-            print "CONTENT: Unspecified vulnerability in the Oracle Outside In Technology component in Oracle Fusion " \
+            print bcolors.OKBLUE + "CONTENT: Unspecified vulnerability in the Oracle Outside In Technology component in Oracle Fusion " \
                   "Middleware 8.5.0, 8.5.1, and 8.5.2 allows local users to affect availability via unknown vectors " \
                   "related to Outside In Filters, a different vulnerability than CVE-2015-4808, CVE-2015-6013, " \
                   "CVE-2015-6014, and CVE-2016-0432. NOTE: the previous information is from the January 2016 CPU. " \
                   "Oracle has not commented on third-party claims that this issue is a stack-based buffer overflow in " \
                   "Oracle Outside In 8.5.2 and earlier, which allows remote attackers to execute arbitrary code via a " \
-                  "crafted Paradox DB file. "
+                  "crafted Paradox DB file. " + bcolors.ENDC
             print "Loading & checking..."
             res = SCONE.cve_check_2()
             SCONE.add_cve(2)
             # union |, intersection &
             print "Those tasks are affected by rule CVE-2015-6015:"
-            print ', '.join(res)
+            print ', '.join(res[0])
+            print "Those users are affected by rule CVE-2015-6015:"
+            print ', '.join(res[1])
         else:
             print "invalid input! Please try again"
             continue

@@ -1,7 +1,6 @@
 from time import sleep
 
 import Pyro4
-import osquery
 
 
 class StateModifier(object):
