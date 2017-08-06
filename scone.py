@@ -358,6 +358,7 @@ class Scone(object):
                     group_name="default user",):
         scone_input = "(indv-node? {%s})" % user_name
         res = self.communicate(scone_input)
+        print res
         if res is None:
             return -1
         if res[0] != "NIL":
