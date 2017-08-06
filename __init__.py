@@ -71,14 +71,13 @@ def main():
         print "        15. Check if some target has this vulnerability"
         print "        16. Check if user have enough hardware resources to perform the task"
         print "        17. Show details of added vulnerability in the KB"
-        print "        18. Add demo CVE-2014-9365 into knowledge base"
-        print "        19. Add demo CVE-2015-6015 into knowledge base"
+        print "        18. Add new vulnerability CVE-2015-6015"
         str_input = raw_input()
         if not str_input.isdigit():
             print "Invalid input! Please try again"
             continue
         user_input = int(str_input)
-        if user_input < 1 or user_input > 20:
+        if user_input < 1 or user_input > 19:
             print "Invalid input! Please try again"
             continue
         if user_input == 1:
@@ -405,21 +404,21 @@ def main():
                     print "Software %s has vulnerability" % res[0]
                 else:
                     print "Software %s with version %s %s has vulnerability" % (res[0], res[2], res[1])
+        # elif user_input == 18:
+        #     print "Input new vulnerability rule CVE-2014-9365 into our knowledge base ..."
+        #     print bcolors.OKGREEN + "CONTENT: The HTTP clients in the (1) httplib, (2) urllib, (3) urllib2, and (4) xmlrpclib libraries " \
+        #           "in CPython (aka Python) 2.x before 2.7.9 and 3.x before 3.4.3, when accessing an HTTPS URL, " \
+        #           "do not (a) check the certificate against a trust store or verify that the server hostname matches " \
+        #           "a domain name in the subject's (b) Common Name or (c) subjectAltName field of the X.509 " \
+        #           "certificate, which allows man-in-the-middle attackers to spoof SSL servers via an arbitrary valid " \
+        #           "certificate. " + bcolors.ENDC
+        #     print "Loading & checking..."
+        #     res = SCONE.cve_check_1()
+        #     SCONE.add_cve(1)
+        #     # union |, intersection &
+        #     print "Those tasks are affected by rule CVE-2014-9365:"
+        #     print ', '.join(res)
         elif user_input == 18:
-            print "Input new vulnerability rule CVE-2014-9365 into our knowledge base ..."
-            print bcolors.OKGREEN + "CONTENT: The HTTP clients in the (1) httplib, (2) urllib, (3) urllib2, and (4) xmlrpclib libraries " \
-                  "in CPython (aka Python) 2.x before 2.7.9 and 3.x before 3.4.3, when accessing an HTTPS URL, " \
-                  "do not (a) check the certificate against a trust store or verify that the server hostname matches " \
-                  "a domain name in the subject's (b) Common Name or (c) subjectAltName field of the X.509 " \
-                  "certificate, which allows man-in-the-middle attackers to spoof SSL servers via an arbitrary valid " \
-                  "certificate. " + bcolors.ENDC
-            print "Loading & checking..."
-            res = SCONE.cve_check_1()
-            SCONE.add_cve(1)
-            # union |, intersection &
-            print "Those tasks are affected by rule CVE-2014-9365:"
-            print ', '.join(res)
-        elif user_input == 19:
             print "Input new vulnerability rule CVE-2015-6015 into our knowledge base ..."
             print bcolors.OKGREEN + "CONTENT: Unspecified vulnerability in the Oracle Outside In Technology component in Oracle Fusion " \
                   "Middleware 8.5.0, 8.5.1, and 8.5.2 allows local users to affect availability via unknown vectors " \

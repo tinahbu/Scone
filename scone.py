@@ -12,7 +12,7 @@ ERROR_MESSAGE = '\nERROR'  # we disable debug mode and hook it to a special stin
 class Scone(object):
     def __init__(self):
         self.vulnerabilities = []   # remember all inputted vulnerabilities
-        self.cve = []
+        self.cve = [1]
 
         self.lock = RLock()
         # redirect sbcl's output and input to PIPE, so we can send string to stdin and stdout, just like what we do in
