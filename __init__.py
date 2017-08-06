@@ -13,7 +13,7 @@ class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
     OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
+    WARNING = '\033[91m'
     FAIL = '\033[91m'
     ENDC = '\033[0m'
     BOLD = '\033[1m'
@@ -419,23 +419,6 @@ def main():
         #     print "Those tasks are affected by rule CVE-2014-9365:"
         #     print ', '.join(res)
         elif user_input == 18:
-<<<<<<< Updated upstream
-=======
-            print "Input new vulnerability rule CVE-2014-9365 into our knowledge base ..."
-            print bcolors.OKBLUE + "CONTENT: The HTTP clients in the (1) httplib, (2) urllib, (3) urllib2, and (4) xmlrpclib libraries " \
-                  "in CPython (aka Python) 2.x before 2.7.9 and 3.x before 3.4.3, when accessing an HTTPS URL, " \
-                  "do not (a) check the certificate against a trust store or verify that the server hostname matches " \
-                  "a domain name in the subject's (b) Common Name or (c) subjectAltName field of the X.509 " \
-                  "certificate, which allows man-in-the-middle attackers to spoof SSL servers via an arbitrary valid " \
-                  "certificate. " + bcolors.ENDC
-            print "Loading & checking..."
-            res = SCONE.cve_check_1()
-            SCONE.add_cve(1)
-            # union |, intersection &
-            print "Those tasks are affected by rule CVE-2014-9365:"
-            print ', '.join(res)
-        elif user_input == 19:
->>>>>>> Stashed changes
             print "Input new vulnerability rule CVE-2015-6015 into our knowledge base ..."
             print bcolors.OKBLUE + "CONTENT: Unspecified vulnerability in the Oracle Outside In Technology component in Oracle Fusion " \
                   "Middleware 8.5.0, 8.5.1, and 8.5.2 allows local users to affect availability via unknown vectors " \
