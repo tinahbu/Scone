@@ -44,15 +44,15 @@ def main():
         print '    Hardware:'
         print '        4. Create a new CPU or GPU'
         print "        5. Create a new OS"
-        print "        6. Set the processor requirements of an existed task"
+        print "        6. Set the processor requirements of a task"
         print '    Task:'
         print '        7. Create a new task'
-        print "        8. Set the software requirements of a existed task"
+        print "        8. Set the software requirements of a task"
         print "        9. Let a user perform an existed task"
         print '    User:'
         print '        10. Create a new user'
         print "        11. Create a new user group"
-        print "        12. Authorize a user or a user group to use an existed software"
+        print "        12. Authorize a user or a user group to use a software"
         print "        13. Assign user to existed groups"
         print 'Query:'
         print "        14. Check if user can execute this software"
@@ -165,11 +165,11 @@ def main():
             processor_name = raw_input()
             ret = SCONE.user_task_requires_hardware(task_name, processor_name)
             if ret == 0:
-                print "Requires successfully"
+                print "Hardware Requirement set successfully"
             elif ret == -1:
                 print "Task does not exist"
             elif ret == -2:
-                print "processor does not exist"
+                print "Processor does not exist"
         elif user_input == 7:
             print "Please enter the new task name:"
             new_task_name = raw_input()
@@ -177,7 +177,7 @@ def main():
             if res == -1:
                 print "This task already exists"
             else:
-                print "task created successfully"
+                print "Task created successfully"
         elif user_input == 8:
             # user_task_requires_software
             print "Please enter the existed task name:"

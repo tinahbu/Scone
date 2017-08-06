@@ -150,9 +150,9 @@
 (new-type {urllib2} {software resources})
 (new-type {xmlrpclib} {software resources})
 (new-type {Oracle} {software resources})
-;(new-type {Oracle Fusion Middleware} {software resources})
-;(new-type {Oracle Fusion Middleware_8.5.1} {Oracle Fusion Middleware})
-;(new-type {Oracle Outside In Technology} {software resources})
+(new-type {Oracle Fusion Middleware} {software resources})
+(new-type {Oracle Fusion Middleware_8.5.1} {Oracle Fusion Middleware})
+(new-type {Oracle Outside In Technology} {software resources})
 
 ;;; Assign Version Value to Software's {version of software resources} role node
 (x-is-the-y-of-z (new-string {"1.55"}) {version of software resources} {Boost_1.55})
