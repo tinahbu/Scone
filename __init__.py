@@ -198,15 +198,20 @@ def main():
             else:
                 print "Requirements are added successfully"
             if 1 in res[1]:
-                print "ALARM [CVE-2014-9365]: This task has vulnerability"
+                print "ALARM [CVE-2014-9365]"
+                print "Resources This Task Uses Matched a Known Vulnerability."
+                print "See Vulnerability Details below: "
                 print "The HTTP clients in the (1) httplib, (2) urllib, (3) urllib2, and (4) xmlrpclib libraries in " \
                       "CPython (aka Python) 2.x before 2.7.9 and 3.x before 3.4.3, when accessing an HTTPS URL, " \
                       "do not (a) check the certificate against a trust store or verify that the server hostname " \
                       "matches a domain name in the subject's (b) Common Name or (c) subjectAltName field of the " \
                       "X.509 certificate, which allows man-in-the-middle attackers to spoof SSL servers via an " \
                       "arbitrary valid certificate. "
+                print "Check this vulnerability online at http://www.cvedetails.com/cve/CVE-2015-6015/"
             if 2 in res[1]:
-                print "ALARM [CVE-2015-6015]: This task has vulnerability"
+                print "ALARM [CVE-2015-6015]"
+                print "Resources This Task Uses Matched a Known Vulnerability."
+                print "See Vulnerability Details below: "
                 print "Unspecified vulnerability in the Oracle Outside In Technology component in Oracle Fusion " \
                       "Middleware 8.5.0, 8.5.1, and 8.5.2 allows local users to affect availability via unknown " \
                       "vectors related to Outside In Filters, a different vulnerability than CVE-2015-4808, " \
@@ -214,6 +219,8 @@ def main():
                       "January 2016 CPU. Oracle has not commented on third-party claims that this issue is a " \
                       "stack-based buffer overflow in Oracle Outside In 8.5.2 and earlier, which allows remote " \
                       "attackers to execute arbitrary code via a crafted Paradox DB file. "
+                print "Check this vulnerability online at https://www.cvedetails.com/cve/CVE-2014-9365/"
+
         elif user_input == 9:
             # user_task_performed_by
             print "Please enter the name of user who wants to perform a task:"
