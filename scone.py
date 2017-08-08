@@ -280,7 +280,7 @@ class Scone(object):
                       % (user_name, task_name)
         res = self.communicate(scone_input)
         if res is None or res[0] == "NIL":
-            tmp = -3
+            tmp = 0
 
         scone_input = '(task_check_user_GPU {%s} {%s})' \
                       % (user_name, task_name)

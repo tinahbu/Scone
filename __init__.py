@@ -160,7 +160,7 @@ def main():
             processor_full_name = raw_input()
             print "Please enter user name:"
             user_name = raw_input()
-            ret = SCONE.change_processor(processor_full_name, user_name)
+            ret = SCONE.change_processor(user_name, processor_full_name)
             if ret == 0:
                 print "Processor changes successfully"
             elif ret == -1:
@@ -240,22 +240,19 @@ def main():
             task_name = raw_input()
             res = SCONE.user_task_performed_by(task_name, user_name)
             # print res
-            if res == 0:
+            if res[0] == 0 and res[1] == 0:
                 print "Succeeded"
-            elif res == -1:
+            if res == -1:
                 print "Task does not exist"
             elif res == -2:
                 print "User does not exist"
-            if res[1] == 0:
-                print "Succeeded"
+            if res[1] != 0 and len(res[1]) != 0:
+                print "User has to first gain those software's authorization to perform this task: "
+                print ", ".join(res[1][:-1])
             if res[0] == -3:
                 print "User has no required CPU"
             if res[0] == -4:
                 print "User has no required GPU"
-
-            if len(res[1]) != 0:
-                print "User has to first gain those software's authorities to perform this task: "
-                print ", ".join(res[1][:-1])
 
         elif user_input == 10:
             # create_user
