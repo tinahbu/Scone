@@ -84,7 +84,6 @@ class Scone(object):
         self.lock.release()
         res = self.read_output()
         if res[0].startswith(ERROR_MESSAGE):
-            print my_input
             return None
         else:
             return res
