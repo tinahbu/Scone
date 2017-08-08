@@ -44,9 +44,11 @@ def main():
     Process(target=run_state_modifier).start()
     Process(target=run_state_inquirer).start()
     sleep(2)
-    print "begin terminal"
+    # print "begin terminal"
     SCONE = Pyro4.Proxy('PYRONAME:scone')
     while True:
+        os.system('clear')
+        print '##########################################################'
         print 'Please select the function you want to use (enter number):'
         print 'Add:'
         print '    Software:'
@@ -55,7 +57,7 @@ def main():
         print "        3. Install a software with more version"
         print '    Hardware:'
         print '        4. Create a new CPU or GPU'
-        print "        5. Create a new OS"
+        print "        5. Change hardware"
         print "        6. Set the processor requirements of a task"
         print '    Task:'
         print '        7. Create a new task'
@@ -72,6 +74,7 @@ def main():
         print "        16. Check if user have enough hardware resources to perform the task"
         print "        17. Show details of added vulnerability in the KB"
         print "        18. Add new vulnerability CVE-2015-6015"
+        print '##########################################################'
         str_input = raw_input()
         if not str_input.isdigit():
             print "Invalid input! Please try again"

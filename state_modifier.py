@@ -49,18 +49,18 @@ class StateModifier(object):
             # print SCONE.check_user_can_use_software("Qiaoyu Deng", "Apache")
             # print "end!"
 
-            print SCONE.create_cpu("Intel Core CPU", "i9")
-            print SCONE.create_cpu("Intel Core CPU", "i7")
-            print SCONE.create_gpu("AMD Radeon RX", "580")
-            print SCONE.create_gpu("AMD Radeon RX", "680")
-            # create_os
-            print SCONE.create_os("MacOS", "10.2")
-            print SCONE.create_os("MacOS", "16")
-            print ("Creating users")
-            print SCONE.create_user("Qiaoyu Deng", "2012211616", "qdeng@andrew.cmu.edu", "MacOS_10.2", "Nvidia GeForce GTX_1080")
-            print SCONE.user_task_requires_hardware("VR Game Development", "Nvidia GeForce GTX_1080")
-            # print SCONE.task_check_user_hardware("GPU", "VR Game Development", "user 6")
-            print SCONE.task_check_user_hardware("CPU", "VR Game Development", "user 6")
+            # print SCONE.create_cpu("Intel Core CPU", "i9")
+            # print SCONE.create_cpu("Intel Core CPU", "i7")
+            # print SCONE.create_gpu("AMD Radeon RX", "580")
+            # print SCONE.create_gpu("AMD Radeon RX", "680")
+            # # create_os
+            # print SCONE.create_os("MacOS", "10.2")
+            # print SCONE.create_os("MacOS", "16")
+            # print ("Creating users")
+            # print SCONE.create_user("Qiaoyu Deng", "2012211616", "qdeng@andrew.cmu.edu", "MacOS_10.2", "Nvidia GeForce GTX_1080")
+            # print SCONE.user_task_requires_hardware("VR Game Development", "Nvidia GeForce GTX_1080")
+            # # print SCONE.task_check_user_hardware("GPU", "VR Game Development", "user 6")
+            # print SCONE.task_check_user_hardware("CPU", "VR Game Development", "user 6")
             # print SCONE.create_user("Qiaoyu Deng", "2012211616", "qdeng@andrew.cmu.edu")
             # print SCONE.assign_user_to_groups("Qiaoyu Deng", ["backend developer"])
             # print SCONE.create_software("Hadoop", ["1.0.0", "1.1.0"])
@@ -76,5 +76,5 @@ class StateModifier(object):
             # print SCONE.check_vulnerability('software', 'python')
             # print SCONE.check_vulnerability('user', 'python', '3.0', 'equal')
             # print SCONE.check_user_can_use_software("asdjfhalskdjhf", "Expresso")
-            print "end"
+            # print "end"
             break
