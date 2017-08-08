@@ -362,7 +362,7 @@ class Scone(object):
                     group_name="default user",):
         scone_input = "(indv-node? {%s})" % user_name
         res = self.communicate(scone_input)
-        print res
+        # print res
         if res is None:
             return -1
         if res[0] != "NIL":
@@ -392,6 +392,19 @@ class Scone(object):
                     return -1
                 else:
                     self.communicate("(remove-element {%s})" % user_name)
+        return 0
+
+    def change_processor(self, user_name, user_processor_full_name):
+        scone_input = "(indv-node? {%s})" % user_name
+        res = self.communicate(scone_input)
+        if res[0] != 'T':
+            return -1
+        scone_input = "(type-node? {%s})" % user_processor_full_name
+        res = self.communicate(scone_input)
+        if res[0] != 'T':
+            return -2
+        scone_input = "(x-is-the-y-of-z (new-indv NIL {%s}) {processor of user} {%s})" % (user_processor_full_name, user_name)
+        self.communicate(scone_input)
         return 0
 
     """

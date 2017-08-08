@@ -156,17 +156,17 @@ def main():
                 elif ret == -2:
                     print "Brand name does not exist"
         elif user_input == 5:
-            print "Pleae enter OS brand:"
-            brand = raw_input()
-            print "Please enter OS version:"
-            version = raw_input()
-            ret = SCONE.create_os(brand, version)
+            print "Pleae enter processor's full name:"
+            processor_full_name = raw_input()
+            print "Please enter user name:"
+            user_name = raw_input()
+            ret = SCONE.change_processor(processor_full_name, user_name)
             if ret == 0:
-                print "OS creates successfully"
+                print "Processor changes successfully"
             elif ret == -1:
-                print "This new version already exists"
+                print "User does not exist"
             elif ret == -2:
-                print "Brand name does not exist"
+                print "Processor does not exist"
         elif user_input == 6:
             # Set the processor requirements of an existed task
             # user_task_requires_hardware(self, task_name, processor_full_name):
@@ -252,6 +252,7 @@ def main():
                 print "User has no required CPU"
             if res[0] == -4:
                 print "User has no required GPU"
+
             if len(res[1]) != 0:
                 print "User has to first gain those software's authorities to perform this task: "
                 print ", ".join(res[1][:-1])
@@ -275,7 +276,7 @@ def main():
                 print "User create succeeded"
             # elif res == -2:
             #     print "operating system does not exist"
-            elif res == 3:
+            elif res == -3:
                 print "processor does not exist"
             else:
                 print "Group does not exist"
